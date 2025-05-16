@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 255584022621324888}
   - component: {fileID: 639214408104652451}
   - component: {fileID: 8191632364214870160}
+  - component: {fileID: 1231853251783370916}
   m_Layer: 0
   m_Name: CheckpointSingle
   m_TagString: Untagged
@@ -118,3 +119,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0647cf29dc4fd404a80aae04f2e79eea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!111 &1231853251783370916
+Animation:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1480739017339806293}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 2e9cc85e32d128d4da3d25ed53611808, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 2e9cc85e32d128d4da3d25ed53611808, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0

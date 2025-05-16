@@ -1,61 +1,85 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using System;
+using Photon.Pun;
 
 public class TrackCheckpoints : MonoBehaviour
 {
     public event EventHandler OnPlayerCorrectCheckpoint;
     public event EventHandler OnPlayerWrongCheckpoint;
 
-    [SerializeField] private List<Transform> carTransformList;
+    [SerializeField] private string playerTag = "Player";
+
+    private List<Transform> carTransformList = new List<Transform>();
+    private List<int> nextCheckpointSingleIndexList = new List<int>();
     private List<CheckpointSingle> checkpointSingleList;
-    private List<int> nextCheckpointSingleIndexList;
 
     private void Awake()
     {
         Transform checkpointsTransform = transform.Find("Checkpoints");
-
         checkpointSingleList = new List<CheckpointSingle>();
 
         foreach (Transform checkpointSingleTransform in checkpointsTransform)
         {
             CheckpointSingle checkpointSingle = checkpointSingleTransform.GetComponent<CheckpointSingle>();
-
             checkpointSingle.SetTrackCheckpoints(this);
-
             checkpointSingleList.Add(checkpointSingle);
         }
-        nextCheckpointSingleIndexList = new List<int>();
-        foreach (Transform carTransform in carTransformList)
+    }
+
+    private void Start()
+    {
+        Invoke(nameof(RegisterAllPlayers), 1f); // Delay registration by 1 second
+    }
+
+    private void RegisterAllPlayers()
+    {
+        carTransformList.Clear();
+        nextCheckpointSingleIndexList.Clear();
+
+        GameObject[] players = GameObject.FindGameObjectsWithTag(playerTag);
+        foreach (GameObject player in players)
         {
-            nextCheckpointSingleIndexList.Add(0);
+            PhotonView view = player.GetComponent<PhotonView>();
+            if (view != null && view.IsMine)
+            {
+                carTransformList.Add(player.transform);
+                nextCheckpointSingleIndexList.Add(0);
+            }
         }
-        
+
+        if (carTransformList.Count == 0)
+        {
+            Debug.LogWarning("No player cars found with tag '" + playerTag + "'. Retrying...");
+            Invoke(nameof(RegisterAllPlayers), 1f); // Keep retrying until found
+        }
     }
 
     public void PlayerThroughCheckpoint(CheckpointSingle checkpointSingle, Transform carTransform)
     {
-        int nextCheckpointSingleIndex = nextCheckpointSingleIndexList[carTransformList.IndexOf(carTransform)];
-        if (checkpointSingleList.IndexOf(checkpointSingle) == nextCheckpointSingleIndex)
+        int carIndex = carTransformList.IndexOf(carTransform);
+        if (carIndex == -1)
         {
-            // Correct checkpoint
-            Debug.Log("Correct");
-            CheckpointSingle correctCheckpointSingle = checkpointSingleList[nextCheckpointSingleIndex];
-            correctCheckpointSingle.Hide();
+            Debug.LogWarning("Car not found in carTransformList: " + carTransform.name);
+            return;
+        }
 
-            nextCheckpointSingleIndexList[carTransformList.IndexOf(carTransform)]
-             = (nextCheckpointSingleIndex + 1) % checkpointSingleList.Count;
+        int nextCheckpointSingleIndex = nextCheckpointSingleIndexList[carIndex];
+        int checkpointIndex = checkpointSingleList.IndexOf(checkpointSingle);
+
+        if (checkpointIndex == nextCheckpointSingleIndex)
+        {
+            Debug.Log("Correct checkpoint");
+            checkpointSingle.Hide();
+
+            nextCheckpointSingleIndexList[carIndex] = (nextCheckpointSingleIndex + 1) % checkpointSingleList.Count;
             OnPlayerCorrectCheckpoint?.Invoke(this, EventArgs.Empty);
         }
         else
         {
-            // Wrong checkpoint
-            Debug.Log("Wrong");
+            Debug.Log("Wrong checkpoint");
+            checkpointSingleList[nextCheckpointSingleIndex].Show();
             OnPlayerWrongCheckpoint?.Invoke(this, EventArgs.Empty);
-
-            CheckpointSingle correctCheckpointSingle = checkpointSingleList[nextCheckpointSingleIndex];
-            correctCheckpointSingle.Show();
         }
     }
 }

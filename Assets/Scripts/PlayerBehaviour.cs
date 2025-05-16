@@ -36,9 +36,10 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Awake()
     {
-        if(photonView.IsMine)
+        if (photonView.IsMine)
         {
             playerCamera.SetActive(true);
+            gameObject.tag = "Player"; // Set the tag at runtime
         }
     }
 

@@ -15,9 +15,20 @@ public class GameController : MonoBehaviourPunCallbacks
     }
 
     public void SpawnPlayer()
-    {
-        PhotonNetwork.Instantiate(playerPrefab.name, new Vector3(Random.Range(-10, 10), 10, 0), Quaternion.identity);
-        sceneCamera.SetActive(false);
-    }
+{
+    int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1; // ActorNumber starts at 1
+    float spacing = 4f; // How far apart each player should be
+
+    Vector3 baseSpawnPosition = new Vector3(5, 2, 35); // First player's position
+    Vector3 offset = new Vector3(playerIndex * spacing, 0, 0); // Offset each by X
+
+    Vector3 spawnPosition = baseSpawnPosition + offset;
+
+    Quaternion spawnRotation = Quaternion.Euler(0, -80f, 0); // Rotate 90° left (Y-axis)
+
+    PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition, spawnRotation);
+    sceneCamera.SetActive(false);
+}
+
 
 }

@@ -62,13 +62,34 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
+    private bool hasFinished = false;
+
+    public void FinishRace()
+    {
+        hasFinished = true;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+    }
+
     private void FixedUpdate()
     {
-        if (photonView.IsMine)
+        if (!photonView.IsMine || !CountdownController.raceStarted || hasFinished)
         {
-            CheckInput();
+            HandleIdle();
+            return;
         }
+
+        CheckInput();
     }
+
+
+    private void HandleIdle()
+    {
+        frontLeftWheelCollider.motorTorque = 0f;
+        frontRightWheelCollider.motorTorque = 0f;
+        ApplyBreaking(); // Might keep car still before GO!
+    }
+
 
     private void CheckInput()
     {

@@ -56,30 +56,44 @@ public class TrackCheckpoints : MonoBehaviour
     }
 
     public void PlayerThroughCheckpoint(CheckpointSingle checkpointSingle, Transform carTransform)
+{
+    int carIndex = carTransformList.IndexOf(carTransform);
+    if (carIndex == -1)
     {
-        int carIndex = carTransformList.IndexOf(carTransform);
-        if (carIndex == -1)
-        {
-            Debug.LogWarning("Car not found in carTransformList: " + carTransform.name);
-            return;
-        }
-
-        int nextCheckpointSingleIndex = nextCheckpointSingleIndexList[carIndex];
-        int checkpointIndex = checkpointSingleList.IndexOf(checkpointSingle);
-
-        if (checkpointIndex == nextCheckpointSingleIndex)
-        {
-            Debug.Log("Correct checkpoint");
-            checkpointSingle.Hide();
-
-            nextCheckpointSingleIndexList[carIndex] = (nextCheckpointSingleIndex + 1) % checkpointSingleList.Count;
-            OnPlayerCorrectCheckpoint?.Invoke(this, EventArgs.Empty);
-        }
-        else
-        {
-            Debug.Log("Wrong checkpoint");
-            checkpointSingleList[nextCheckpointSingleIndex].Show();
-            OnPlayerWrongCheckpoint?.Invoke(this, EventArgs.Empty);
-        }
+        Debug.LogWarning("Car not found in carTransformList: " + carTransform.name);
+        return;
     }
+
+    int nextCheckpointSingleIndex = nextCheckpointSingleIndexList[carIndex];
+    int checkpointIndex = checkpointSingleList.IndexOf(checkpointSingle);
+
+    if (checkpointIndex == nextCheckpointSingleIndex)
+    {
+        Debug.Log("Correct checkpoint");
+        checkpointSingle.Hide();
+
+        // Check if it's the final checkpoint
+        if (nextCheckpointSingleIndex == checkpointSingleList.Count - 1)
+        {
+            Debug.Log("Player finished the race!");
+
+            // STOP THE CAR
+            PlayerBehaviour pb = carTransform.GetComponent<PlayerBehaviour>();
+            if (pb != null)
+            {
+                pb.FinishRace();
+            }
+        }
+
+        nextCheckpointSingleIndexList[carIndex] = (nextCheckpointSingleIndex + 1) % checkpointSingleList.Count;
+        OnPlayerCorrectCheckpoint?.Invoke(this, EventArgs.Empty);
+    }
+    else
+    {
+        Debug.Log("Wrong checkpoint");
+        checkpointSingleList[nextCheckpointSingleIndex].Show();
+        OnPlayerWrongCheckpoint?.Invoke(this, EventArgs.Empty);
+    }
+}
+
 }

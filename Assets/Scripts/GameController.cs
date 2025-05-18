@@ -20,7 +20,7 @@ public class GameController : MonoBehaviourPunCallbacks
     float spacing = 4f; // How far apart each player should be
 
     Vector3 baseSpawnPosition = new Vector3(5, 2, 35); // First player's position
-    Vector3 offset = new Vector3(playerIndex * spacing, 0, 0); // Offset each by X
+    Vector3 offset = new Vector3(0, 0, playerIndex * spacing); // Offset each by X
 
     Vector3 spawnPosition = baseSpawnPosition + offset;
 

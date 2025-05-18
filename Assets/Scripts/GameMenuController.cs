@@ -46,6 +46,6 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LoadLevel("Menu");
+        PhotonNetwork.LoadLevel("MainMenu");
     }
 }

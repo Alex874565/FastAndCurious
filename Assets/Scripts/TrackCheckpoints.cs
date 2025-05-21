@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using TMPro;
+using ExitGames.Client.Photon.StructWrapping;
 
 public class TrackCheckpoints : MonoBehaviour
 {
@@ -13,6 +15,9 @@ public class TrackCheckpoints : MonoBehaviour
     private List<Transform> carTransformList = new List<Transform>();
     private List<int> nextCheckpointSingleIndexList = new List<int>();
     private List<CheckpointSingle> checkpointSingleList;
+
+    public TMP_Text countdownText;
+
 
     private void Awake()
     {

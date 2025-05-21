@@ -20,6 +20,10 @@ public class PlayerBehaviour : MonoBehaviour
     private float horizontalInput, verticalInput;
     private float currentSteerAngle, currentbreakForce;
     private bool isBreaking;
+    private bool isPlayerStopped = false;
+    private Vector3 savedVelocity;
+    private Vector3 savedAngularVelocity;
+
 
     // Settings
     [SerializeField] private float motorForce, breakForce, maxSteerAngle;
@@ -73,7 +77,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (!photonView.IsMine || !CountdownController.raceStarted || hasFinished)
+        if (!photonView.IsMine || !CountdownController.raceStarted || hasFinished || isPlayerStopped)
         {
             HandleIdle();
             return;
@@ -150,4 +154,67 @@ public class PlayerBehaviour : MonoBehaviour
         wheelTransform.rotation = rot;
         wheelTransform.position = pos;
     }
+
+    public void StopCar()
+    {
+        savedVelocity = rb.velocity;
+        savedAngularVelocity = rb.angularVelocity;
+
+        isPlayerStopped = true;
+
+        // Freeze all movement
+        rb.constraints = RigidbodyConstraints.FreezeAll;
+    }
+
+    public void StartCar()
+    {
+        Debug.Log("StartCar called");
+
+        isPlayerStopped = false;
+
+        rb.constraints = RigidbodyConstraints.None;
+
+        // Restore motion
+        rb.velocity = savedVelocity;
+        rb.angularVelocity = savedAngularVelocity;
+    }
+
+    public IEnumerator CountdownAndStartCar(TMP_Text countdownText, CheckpointSingle checkpoint)
+    {
+        if (photonView.IsMine)
+        {
+            countdownText.transform.parent.gameObject.SetActive(true);
+
+            int count = 1;
+
+            // Show 3, 2, 1 with 1-second gaps
+            while (count > 1)
+            {
+                countdownText.text = count.ToString();
+                yield return new WaitForSeconds(1f);
+                count--;
+            }
+
+            // Final second with milliseconds (from 1.00 to 0.00)
+            float timer = 1f;
+            while (timer > 0)
+            {
+                timer -= Time.deltaTime;
+                countdownText.text = timer.ToString("F2"); // format to 2 decimal places
+                yield return null;
+            }
+
+            // Show "GO!" briefly
+            countdownText.text = "GO!";
+            yield return new WaitForSeconds(.5f);
+
+            countdownText.transform.parent.gameObject.SetActive(false);
+
+            checkpoint.wrongCheckpoint = true;
+
+            StartCar();
+        }
+    }
+
+
 }

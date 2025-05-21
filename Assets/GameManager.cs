@@ -16,11 +16,12 @@ public class GameManager : MonoBehaviour
 
     private Intrebare intrebareCurenta;
     private Action onQuestionAnsweredCorrectly;
+    private List<Intrebare> filtrate;
 
     void Start()
     {
         questionCanvas.SetActive(false);
-        StartCoroutine(LoopIntrebari());
+        //StartCoroutine(LoopIntrebari());
     }
 
     IEnumerator LoopIntrebari()
@@ -47,17 +48,19 @@ public class GameManager : MonoBehaviour
 
     public void StartQuestion(Action callback)
     {
+        Debug.Log("StartQuestion called");
         onQuestionAnsweredCorrectly = callback;
 
-        List<Intrebare> filtrate = intrebareDB.intrebari
-            .Where(i => i.categorie == GameSettings.CategorieSelectata)
-            .ToList();
+        filtrate = intrebareDB.intrebari;
+            //.Where(i => i.categorie == GameSettings.CategorieSelectata)
+            //.ToList();
 
         if (filtrate.Count == 0)
         {
             Debug.LogWarning("Nu există întrebări pentru categoria selectată: " + GameSettings.CategorieSelectata);
             return;
         }
+        Debug.Log("Filtrate: " + filtrate.Count);
 
         intrebareCurenta = filtrate[UnityEngine.Random.Range(0, filtrate.Count)];
         AfiseazaIntrebarea();
@@ -85,6 +88,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            intrebareCurenta = filtrate[UnityEngine.Random.Range(0, intrebareDB.intrebari.Count)];
+            AfiseazaIntrebarea();
             Debug.Log("Greșit!");
         }
     }

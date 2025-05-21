@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Photon.Pun;
 using Photon.Realtime;
+using Unity.Properties;
 using UnityEngine;
 
 
@@ -11,9 +13,8 @@ public class CheckpointSingle : MonoBehaviour
     private MeshRenderer meshRenderer;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private GameObject questionCanvas;
-    [SerializeField] private Rigidbody carRigidbody;
 
-
+    [HideInInspector] public bool wrongCheckpoint;
 
     private void Awake()
     {
@@ -27,21 +28,22 @@ public class CheckpointSingle : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent<PlayerBehaviour>(out PlayerBehaviour player))
+        var playerBehaviour = other.GetComponent<PlayerBehaviour>();
+        if (playerBehaviour && playerBehaviour.photonView.IsMine)
         {
             trackCheckpoints.PlayerThroughCheckpoint(this, other.transform);
 
-            // Opre?te ma?ina
-            carRigidbody.velocity = Vector3.zero;
-            carRigidbody.isKinematic = true;
-
-            // Afi?eaz? întrebarea
-            questionCanvas.SetActive(true);
-            gameManager.StartQuestion(() =>
+            if (!CompareTag("NoQuestion") && !wrongCheckpoint)
             {
-                questionCanvas.SetActive(false);
-                carRigidbody.isKinematic = false;
-            });
+                playerBehaviour.StopCar();
+
+                questionCanvas.SetActive(true);
+                gameManager.StartQuestion(() =>
+                {
+                    questionCanvas.SetActive(false);
+                    playerBehaviour.StartCoroutine(playerBehaviour.CountdownAndStartCar(trackCheckpoints.countdownText, this));
+                });
+            }
         }
     }
 

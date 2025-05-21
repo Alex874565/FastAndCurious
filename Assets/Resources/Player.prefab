@@ -1040,6 +1040,7 @@ MonoBehaviour:
   followPoint: {fileID: 2597019255146218546}
   playerRenderer: {fileID: 7539699793004816253}
   playerText: {fileID: 4245522444470124923}
+  distanceTraveled: 0
   motorForce: 1000
   breakForce: 3000
   maxSteerAngle: 30

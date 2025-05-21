@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53cb9b4056d7a0345bf6fe5419064903, type: 3}
+  m_Name: IntrebariDB
+  m_EditorClassIdentifier: 
+  intrebari:
+  - text: "C\xE2t face 7x6"
+    variante:
+    - 42
+    - 56
+    - 49
+    - 35
+    indexCorect: 0
+    categorie: calcule
+  - text: "C\xE2t este 81 : 9?"
+    variante:
+    - 7
+    - 8
+    - 9
+    - 6
+    indexCorect: 2
+    categorie: calcule
+  - text: "C\xE2t este 15 + 28?"
+    variante:
+    - 42
+    - 43
+    - 44
+    - 45
+    indexCorect: 1
+    categorie: calcule
+  - text: "C\xE2t este 100 \u2212 37?"
+    variante:
+    - 63
+    - 67
+    - 73
+    - 57
+    indexCorect: 0
+    categorie: calcule
+  - text: "C\xE2t face 4\xB2?"
+    variante:
+    - 12
+    - 8
+    - 16
+    - 18
+    indexCorect: 2
+    categorie: calcule
+  - text: "C\xE2t este 3 \xD7 (2 + 5)?"
+    variante:
+    - 15
+    - 18
+    - 21
+    - 9
+    indexCorect: 0
+    categorie: calcule
+  - text: "C\xE2t face 12 + 3 \xD7 2?"
+    variante:
+    - 24
+    - 36
+    - 30
+    - 18
+    indexCorect: 3
+    categorie: calcule
+  - text: "C\xE2t este 2\xB3?"
+    variante:
+    - 4
+    - 9
+    - 8
+    - 6
+    indexCorect: 2
+    categorie: calcule
+  - text: Aria cercului
+    variante:
+    - "\u03C0 \xD7 r\xB2"
+    - "2 \xD7 \u03C0 \xD7 r"
+    - "l \xD7 L"
+    - "(b \xD7 h)/2"
+    indexCorect: 0
+    categorie: formule
+  - text: "Perimetrul unui p\u0103trat este:"
+    variante:
+    - "2 \xD7 l"
+    - "4 \xD7 l"
+    - " l\xB2"
+    - "l \xD7 L"
+    indexCorect: 1
+    categorie: formule
+  - text: Formula volumului unui cub
+    variante:
+    - "L\xB3"
+    - "6 \xD7 L\xB2"
+    - "L \xD7 l \xD7 h"
+    - "\u03C0 \xD7 r\xB2 \xD7 h"
+    indexCorect: 0
+    categorie: formule
+  - text: 'Ariei unui triunghi este:'
+    variante:
+    - "a \xD7 b \xD7 c"
+    - "\u03C0 \xD7 r\xB2"
+    - "l \xD7 l"
+    - "(b \xD7 h)/2"
+    indexCorect: 3
+    categorie: formule
+  - text: "Formula pentru calculul mediei a, b \u0219i c este:"
+    variante:
+    - a + b + c
+    - (a + b + c)/3
+    - "(a \xD7 b \xD7 c)/3"
+    - (a + b)/c
+    indexCorect: 1
+    categorie: formule
+  - text: 'Formula pentru aria unui dreptunghi este:'
+    variante:
+    - "l \xD7 L"
+    - "(b \xD7 h)/2"
+    - "2 \xD7 \u03C0 \xD7 r"
+    - L + l
+    indexCorect: 0
+    categorie: formule
+  - text: 'Formula pentru perimetrul cercului este:'
+    variante:
+    - " r \xD7 r \xD7 \u03C0"
+    - "4 \xD7 l"
+    - "\u03C0 \xD7 r\xB2"
+    - "2 \xD7 \u03C0 \xD7 r"
+    indexCorect: 3
+    categorie: formule
+  - text: 'Formula pentru volumul unui cilindru este:'
+    variante:
+    - "\u03C0 \xD7 r\xB2 \xD7 h"
+    - "2 \xD7 \u03C0 \xD7 r \xD7 h"
+    - "L\xB3"
+    - "(a + b)/2 \xD7 h"
+    indexCorect: 0
+    categorie: formule

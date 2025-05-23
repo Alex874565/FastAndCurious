@@ -12,7 +12,7 @@ public class PlayerBehaviour : MonoBehaviour
     public Rigidbody rb;
     public Animator anim;
     public GameObject playerCamera;
-    public CinemachineVirtualCamera playerCinemachine;
+    public CinemachineFreeLook playerCinemachine;
     public Transform followPoint;
     public Renderer playerRenderer;
     public TMP_Text playerText;

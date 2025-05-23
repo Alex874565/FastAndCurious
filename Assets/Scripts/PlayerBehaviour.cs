@@ -23,6 +23,16 @@ public class PlayerBehaviour : MonoBehaviour
     private bool isPlayerStopped = false;
     private Vector3 savedVelocity;
     private Vector3 savedAngularVelocity;
+    private Vector3 lastPosition;
+    private TMP_Text placeText;
+    private TMP_Text resultText;
+    private GameObject endRaceCanvas;
+    private float finalDistance = 0f;
+
+
+    [HideInInspector]
+    public float distanceTraveled = 0f;
+
 
 
     // Settings
@@ -52,6 +62,7 @@ public class PlayerBehaviour : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
         photonView = GetComponent<PhotonView>();
+        lastPosition = transform.position;
         playerText.text = photonView.Owner.NickName;
         playerRenderer.material.color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         if(photonView.IsMine)
@@ -68,24 +79,100 @@ public class PlayerBehaviour : MonoBehaviour
 
     private bool hasFinished = false;
 
-    public void FinishRace()
+    public void FinishRace(GameObject endRaceCanvas, TMP_Text placeText, TMP_Text resultText)
     {
+        if (hasFinished) return;
+
         hasFinished = true;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
+
+        finalDistance = GetDistanceTraveled();
+
+        if (photonView.IsMine)
+        {
+            PlayerBehaviour[] allPlayers = FindObjectsOfType<PlayerBehaviour>();
+            int place = 1;
+
+            foreach (var player in allPlayers)
+            {
+                if (player != this)
+                {
+                    if (player.GetDistanceTraveled() > finalDistance)
+                        place++;
+                }
+            }
+
+            ShowResults(place, endRaceCanvas, placeText, resultText);
+        }
+    }
+
+    public float GetDistanceTraveled()
+    {
+        return distanceTraveled;
+    }
+
+    private void ShowResults(int place, GameObject endRaceCanvas, TMP_Text placeText, TMP_Text resultText)
+    {
+        string suffix = place == 1 ? "st" :
+                        place == 2 ? "nd" :
+                        place == 3 ? "rd" : "th";
+
+        placeText.text = $"You finished in {place}{suffix} place!";
+        resultText.text = place == 1 ? "You Win!" : "You Lose!";
+        resultText.color = place == 1 ? Color.green : Color.red;
+
+        endRaceCanvas.SetActive(true);
+    }
+
+
+    private int finalPlace = -1;
+
+    public void SetFinalPlace(int place)
+    {
+        finalPlace = place;
+        ShowEndRaceScreen();
+    }
+    public float GetTotalDistanceTravelled()
+    {
+        return transform.position.z; // or distance from start line
+    }
+
+    private void ShowEndRaceScreen()
+    {
+        int place = GetCurrentPlace();
+        string suffix = place == 1 ? "st" :
+                        place == 2 ? "nd" :
+                        place == 3 ? "rd" : "th";
+
+        placeText.text = $"You finished in {place}{suffix} place!";
+        resultText.text = place == 1 ? "You Win!" : "You Lose!";
+        resultText.color = place == 1 ? Color.green : Color.red;
+
+        endRaceCanvas.SetActive(true);
+    }
+
+
+    void Update()
+    {
+        if (photonView.IsMine)
+        {
+            int place = GetCurrentPlace();
+        }
     }
 
     private void FixedUpdate()
     {
-        if (!photonView.IsMine || !CountdownController.raceStarted || hasFinished || isPlayerStopped)
-        {
-            HandleIdle();
+        if (!photonView.IsMine || !CountdownController.raceStarted || hasFinished)
             return;
-        }
+
+        // Update distance
+        float distance = Vector3.Distance(transform.position, lastPosition);
+        if (!isPlayerStopped) distanceTraveled += distance;
+        lastPosition = transform.position;
 
         CheckInput();
     }
-
 
     private void HandleIdle()
     {
@@ -216,5 +303,19 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
+    public int GetCurrentPlace()
+    {
+        PlayerBehaviour[] allPlayers = FindObjectsOfType<PlayerBehaviour>();
+
+        int place = 1; // 1st by default
+        foreach (var player in allPlayers)
+        {
+            if (player == this) continue;
+            if (player.distanceTraveled > this.distanceTraveled)
+                place++;
+        }
+
+        return place;
+    }
 
 }

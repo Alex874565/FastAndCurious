@@ -12,6 +12,10 @@ public class TrackCheckpoints : MonoBehaviour
 
     [SerializeField] private string playerTag = "Player";
 
+    [SerializeField] private GameObject endRaceCanvas;
+    [SerializeField] private TMP_Text placeText;
+    [SerializeField] private TMP_Text resultText;
+
     private List<Transform> carTransformList = new List<Transform>();
     private List<int> nextCheckpointSingleIndexList = new List<int>();
     private List<CheckpointSingle> checkpointSingleList;
@@ -86,7 +90,7 @@ public class TrackCheckpoints : MonoBehaviour
             PlayerBehaviour pb = carTransform.GetComponent<PlayerBehaviour>();
             if (pb != null)
             {
-                pb.FinishRace();
+                pb.FinishRace(endRaceCanvas, placeText, resultText);
             }
         }
 

@@ -64,7 +64,7 @@ public class PlayerBehaviour : MonoBehaviour
         photonView = GetComponent<PhotonView>();
         lastPosition = transform.position;
         playerText.text = photonView.Owner.NickName;
-        playerRenderer.material.color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
+        //playerRenderer.material.color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         if(photonView.IsMine)
         {
             playerCinemachine.Follow = followPoint;

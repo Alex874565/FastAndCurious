@@ -46,19 +46,19 @@ LODGroup:
   serializedVersion: 2
   m_LocalReferencePoint: {x: 0.40654564, y: 5.2951303, z: -0.4404602}
   m_Size: 12.318909
-  m_FadeMode: 0
-  m_AnimateCrossFading: 0
+  m_FadeMode: 1
+  m_AnimateCrossFading: 1
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.6
+  - screenRelativeHeight: 0.999
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 2779131704313693016}
-  - screenRelativeHeight: 0.3
+  - screenRelativeHeight: 0.7012481
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 2561308758342973773}
-  - screenRelativeHeight: 0.1
+  - screenRelativeHeight: 0.09622853
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 3544106195767754655}
@@ -148,6 +148,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: f1bde3223786b554682db780dbcb8449,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: f1bde3223786b554682db780dbcb8449,
         type: 3}
@@ -251,6 +256,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: b03bc840d42bdb0409fd5c5c40689836,
         type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: b03bc840d42bdb0409fd5c5c40689836,
+        type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: a298332b1132d5f4dbbeb510a884ecd3, type: 2}
@@ -267,7 +277,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: b03bc840d42bdb0409fd5c5c40689836,
         type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 2147483647
+      value: 127
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -348,6 +358,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 6b0f0910ffb68e3439b00936067a512f,
+        type: 3}
+      propertyPath: m_StaticShadowCaster
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 6b0f0910ffb68e3439b00936067a512f,
         type: 3}

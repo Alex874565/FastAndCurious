@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Cinemachine;
 
 public class CameraDragController : MonoBehaviour
@@ -27,16 +27,18 @@ public class CameraDragController : MonoBehaviour
     {
         if (freeLookCamera == null) return;
 
-        bool rotatingLeft = Input.GetKey(KeyCode.Q);
-        bool rotatingRight = Input.GetKey(KeyCode.E);
+        bool rotatingLeft = Input.GetKey(KeyCode.E);
+        bool rotatingRight = Input.GetKey(KeyCode.Q);
 
         if (rotatingLeft)
         {
-            currentAngle -= rotationSpeed * Time.deltaTime;
+            if(currentAngle > minAngle)
+                currentAngle -= rotationSpeed * Time.deltaTime;
         }
         else if (rotatingRight)
         {
-            currentAngle += rotationSpeed * Time.deltaTime;
+            if(currentAngle < maxAngle)
+                currentAngle += rotationSpeed * Time.deltaTime;
         }
         else
         {
@@ -45,10 +47,6 @@ public class CameraDragController : MonoBehaviour
             freeLookCamera.m_YAxis.Value = Mathf.Lerp(freeLookCamera.m_YAxis.Value, defaultY, Time.deltaTime * returnSpeed);
         }
 
-        // Clamp horizontal angle
-        currentAngle = Mathf.Clamp(currentAngle, minAngle, maxAngle);
-
-        // Convert angle to m_XAxis.Value (normalized)
         freeLookCamera.m_XAxis.Value = currentAngle;
     }
 }

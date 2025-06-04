@@ -17,16 +17,37 @@ public class MainMenuManager : MonoBehaviour
     {
         
     }
+    //public void AlegeCalcule()
+    //{
+    //    GameSettings.CategorieSelectata = "calcule";
+    //    SceneManager.LoadScene("MainMenu");
+    //}
+
+    //public void AlegeFormule()
+    //{
+    //    GameSettings.CategorieSelectata = "formule";
+    //    SceneManager.LoadScene("MainMenu");
+    //}
+
+
     public void AlegeCalcule()
     {
         GameSettings.CategorieSelectata = "calcule";
-        SceneManager.LoadScene("MainMenu");
+        Debug.Log("Categorie aleas?: " + GameSettings.CategorieSelectata);
+        SceneManager.LoadScene("Game"); // sau GameScene
     }
 
     public void AlegeFormule()
     {
         GameSettings.CategorieSelectata = "formule";
-        SceneManager.LoadScene("MainMenu");
+        Debug.Log("Categorie aleas?: " + GameSettings.CategorieSelectata);
+        SceneManager.LoadScene("Game");
     }
-
 }
+
+
+
+
+
+
+

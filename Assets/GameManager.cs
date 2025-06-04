@@ -49,9 +49,17 @@ public class GameManager : MonoBehaviour
     {
         onQuestionAnsweredCorrectly = callback;
 
+<<<<<<< Updated upstream
         List<Intrebare> filtrate = intrebareDB.intrebari
             .Where(i => i.categorie == GameSettings.CategorieSelectata)
             .ToList();
+=======
+        filtrate = intrebareDB.intrebari
+     .Where(i => i.categorie == CategorieSyncManager.CategorieSelectata)
+     .ToList();
+
+
+>>>>>>> Stashed changes
 
         if (filtrate.Count == 0)
         {

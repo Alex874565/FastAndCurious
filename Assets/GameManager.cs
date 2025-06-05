@@ -51,9 +51,9 @@ public class GameManager : MonoBehaviour
         Debug.Log("StartQuestion called");
         onQuestionAnsweredCorrectly = callback;
 
-        filtrate = intrebareDB.intrebari;
-            //.Where(i => i.categorie == GameSettings.CategorieSelectata)
-            //.ToList();
+        filtrate = intrebareDB.intrebari
+        .Where(i => i.categorie == CategorieSyncManager.CategorieSelectata)
+        .ToList();
 
         if (filtrate.Count == 0)
         {

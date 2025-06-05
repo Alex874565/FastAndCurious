@@ -75,9 +75,11 @@ public class MenuController : MonoBehaviourPunCallbacks
         PhotonNetwork.CreateRoom(roomCode.text, roomOptions);
     }
 
+
     public override void OnJoinedRoom()
     {
-        Debug.Log("Joined room");
-        PhotonNetwork.LoadLevel("GameMenu");
+        Debug.Log("Joined room, categorie selectat?: " + GameSettings.CategorieSelectata);
+        PhotonNetwork.LoadLevel("GameMenu"); // sau Game
     }
+
 }

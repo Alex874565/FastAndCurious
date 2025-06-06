@@ -30,6 +30,13 @@ public class PlayerBehaviour : MonoBehaviour
     private float finalDistance = 0f;
 
 
+
+    public int checkpointsPassed = 0;
+    public float distanceToNextCheckpoint = 0f;
+    public int currentPlace = 1;
+    public TMP_Text positionText; // Leg?m în Inspector
+
+
     [HideInInspector]
     public float distanceTraveled = 0f;
 
@@ -158,6 +165,8 @@ public class PlayerBehaviour : MonoBehaviour
         if (photonView.IsMine)
         {
             int place = GetCurrentPlace();
+            if (positionText != null)
+                positionText.text = $"Locul t?u: {place}";
         }
     }
 

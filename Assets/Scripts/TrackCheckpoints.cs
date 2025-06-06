@@ -18,7 +18,8 @@ public class TrackCheckpoints : MonoBehaviour
 
     private List<Transform> carTransformList = new List<Transform>();
     private List<int> nextCheckpointSingleIndexList = new List<int>();
-    private List<CheckpointSingle> checkpointSingleList;
+    //private List<CheckpointSingle> checkpointSingleList;
+    [SerializeField] private List<CheckpointSingle> checkpointSingleList;
 
     public TMP_Text countdownText;
 
@@ -26,7 +27,7 @@ public class TrackCheckpoints : MonoBehaviour
     private void Awake()
     {
         Transform checkpointsTransform = transform.Find("Checkpoints");
-        checkpointSingleList = new List<CheckpointSingle>();
+        //checkpointSingleList = new List<CheckpointSingle>();
 
         foreach (Transform checkpointSingleTransform in checkpointsTransform)
         {

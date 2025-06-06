@@ -1119,6 +1119,10 @@ MonoBehaviour:
   followPoint: {fileID: 2597019255146218546}
   playerRenderer: {fileID: 7539699793004816253}
   playerText: {fileID: 4245522444470124923}
+  checkpointsPassed: 0
+  distanceToNextCheckpoint: 0
+  currentPlace: 1
+  positionText: {fileID: 0}
   distanceTraveled: 0
   motorForce: 500
   breakForce: 3000

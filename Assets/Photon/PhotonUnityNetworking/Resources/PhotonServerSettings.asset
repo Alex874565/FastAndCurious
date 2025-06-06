@@ -41,6 +41,8 @@ MonoBehaviour:
   - RespawnSpaceship
   - RPC_SetFinalPlace
   - SetCategoriePentruTotLobbyul
+  - RPC_DistribuieIntrebare
+  - RPC_TrimiteIntrebare
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

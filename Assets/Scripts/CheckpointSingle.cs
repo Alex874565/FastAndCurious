@@ -36,8 +36,8 @@ public class CheckpointSingle : MonoBehaviour
             if (!CompareTag("NoQuestion") && !wrongCheckpoint)
             {
                 playerBehaviour.StopCar();
-
                 questionCanvas.SetActive(true);
+
                 gameManager.StartQuestion(() =>
                 {
                     questionCanvas.SetActive(false);
@@ -46,6 +46,7 @@ public class CheckpointSingle : MonoBehaviour
             }
         }
     }
+
 
 
     public void SetTrackCheckpoints(TrackCheckpoints trackCheckpoints)

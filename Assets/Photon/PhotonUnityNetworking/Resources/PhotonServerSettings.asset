@@ -43,6 +43,10 @@ MonoBehaviour:
   - SetCategoriePentruTotLobbyul
   - RPC_DistribuieIntrebare
   - RPC_TrimiteIntrebare
+  - RPC_RegisterPlayer
+  - RPC_UnregisterPlayer
+  - RPC_FinishRaceWithPlace
+  - RPC_ReportFinish
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

@@ -15,6 +15,7 @@ public class TrackCheckpoints : MonoBehaviour
     [SerializeField] private GameObject endRaceCanvas;
     [SerializeField] private TMP_Text placeText;
     [SerializeField] private TMP_Text resultText;
+    [SerializeField] private GameObject waitingCanvas;
 
     private List<Transform> carTransformList = new List<Transform>();
     private List<int> nextCheckpointSingleIndexList = new List<int>();
@@ -26,14 +27,12 @@ public class TrackCheckpoints : MonoBehaviour
 
     private void Awake()
     {
-        Transform checkpointsTransform = transform.Find("Checkpoints");
         //checkpointSingleList = new List<CheckpointSingle>();
 
-        foreach (Transform checkpointSingleTransform in checkpointsTransform)
+        foreach (CheckpointSingle checkpointSingleTransform in checkpointSingleList)
         {
             CheckpointSingle checkpointSingle = checkpointSingleTransform.GetComponent<CheckpointSingle>();
             checkpointSingle.SetTrackCheckpoints(this);
-            checkpointSingleList.Add(checkpointSingle);
         }
     }
 
@@ -53,9 +52,18 @@ public class TrackCheckpoints : MonoBehaviour
             PhotonView view = player.GetComponent<PhotonView>();
             if (view != null && view.IsMine)
             {
+                PlayerDistanceTracker distanceTracker = player.GetComponent<PlayerDistanceTracker>();
+
                 carTransformList.Add(player.transform);
                 nextCheckpointSingleIndexList.Add(0);
+
+                PlayerBehaviour pb = player.GetComponent<PlayerBehaviour>();
+                if (pb != null)
+                {
+                    pb.SetEndRaceUI(endRaceCanvas, placeText, resultText, waitingCanvas);
+                }
             }
+
         }
 
         if (carTransformList.Count == 0)
@@ -66,44 +74,45 @@ public class TrackCheckpoints : MonoBehaviour
     }
 
     public void PlayerThroughCheckpoint(CheckpointSingle checkpointSingle, Transform carTransform)
-{
-    int carIndex = carTransformList.IndexOf(carTransform);
-    if (carIndex == -1)
     {
-        Debug.LogWarning("Car not found in carTransformList: " + carTransform.name);
-        return;
-    }
-
-    int nextCheckpointSingleIndex = nextCheckpointSingleIndexList[carIndex];
-    int checkpointIndex = checkpointSingleList.IndexOf(checkpointSingle);
-
-    if (checkpointIndex == nextCheckpointSingleIndex)
-    {
-        Debug.Log("Correct checkpoint");
-        checkpointSingle.Hide();
-
-        // Check if it's the final checkpoint
-        if (nextCheckpointSingleIndex == checkpointSingleList.Count - 1)
+        int carIndex = carTransformList.IndexOf(carTransform);
+        if (carIndex == -1)
         {
-            Debug.Log("Player finished the race!");
-
-            // STOP THE CAR
-            PlayerBehaviour pb = carTransform.GetComponent<PlayerBehaviour>();
-            if (pb != null)
-            {
-                pb.FinishRace(endRaceCanvas, placeText, resultText);
-            }
+            Debug.LogWarning("Car not found in carTransformList: " + carTransform.name);
+            return;
         }
 
-        nextCheckpointSingleIndexList[carIndex] = (nextCheckpointSingleIndex + 1) % checkpointSingleList.Count;
-        OnPlayerCorrectCheckpoint?.Invoke(this, EventArgs.Empty);
+        int nextCheckpointSingleIndex = nextCheckpointSingleIndexList[carIndex];
+        int checkpointIndex = checkpointSingleList.IndexOf(checkpointSingle);
+
+        if (checkpointIndex == nextCheckpointSingleIndex)
+        {
+            Debug.Log("Correct checkpoint");
+            checkpointSingle.Hide();
+
+            // Check if it's the final checkpoint
+            if (checkpointSingle.CompareTag("Finish"))
+            {
+                Debug.Log("Player finished the race!");
+
+                PlayerBehaviour pb = carTransform.GetComponent<PlayerBehaviour>();
+                if (pb != null && pb.photonView.IsMine)
+                {
+                    waitingCanvas.SetActive(true);
+                    // Report finish to RaceResultsManager
+                    RaceResultsManager.Instance.ReportFinish(pb.photonView.Owner.ActorNumber, pb.GetDistanceTraveled());
+                }
+            }
+
+            nextCheckpointSingleIndexList[carIndex] = (nextCheckpointSingleIndex + 1) % checkpointSingleList.Count;
+            OnPlayerCorrectCheckpoint?.Invoke(this, EventArgs.Empty);
+        }
+        else
+        {
+            Debug.Log("Wrong checkpoint");
+            checkpointSingleList[nextCheckpointSingleIndex].Show();
+            OnPlayerWrongCheckpoint?.Invoke(this, EventArgs.Empty);
+        }
     }
-    else
-    {
-        Debug.Log("Wrong checkpoint");
-        checkpointSingleList[nextCheckpointSingleIndex].Show();
-        OnPlayerWrongCheckpoint?.Invoke(this, EventArgs.Empty);
-    }
-}
 
 }

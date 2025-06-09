@@ -29,11 +29,12 @@ public class CheckpointSingle : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         var playerBehaviour = other.GetComponent<PlayerBehaviour>();
+
         if (playerBehaviour && playerBehaviour.photonView.IsMine)
         {
             trackCheckpoints.PlayerThroughCheckpoint(this, other.transform);
 
-            if (!CompareTag("NoQuestion") && !wrongCheckpoint)
+            if (!CompareTag("NoQuestion") && !CompareTag("Finish") && !wrongCheckpoint)
             {
                 playerBehaviour.StopCar();
                 questionCanvas.SetActive(true);

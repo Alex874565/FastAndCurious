@@ -27,6 +27,7 @@ public class PlayerBehaviour : MonoBehaviour
     private TMP_Text placeText;
     private TMP_Text resultText;
     private GameObject endRaceCanvas;
+    private GameObject waitingCanvas;
     private float finalDistance = 0f;
 
 
@@ -89,7 +90,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     private bool hasFinished = false;
 
-    public void FinishRace(GameObject endRaceCanvas, TMP_Text placeText, TMP_Text resultText)
+    public void FinishRace(int finalPlace)
     {
         if (hasFinished) return;
 
@@ -97,24 +98,18 @@ public class PlayerBehaviour : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        finalDistance = GetDistanceTraveled();
+        this.finalPlace = finalPlace;
+        finalDistance = distanceTraveled;
 
-        if (photonView.IsMine)
-        {
-            PlayerBehaviour[] allPlayers = FindObjectsOfType<PlayerBehaviour>();
-            int place = 1;
+        ShowEndRaceScreen();
+    }
 
-            foreach (var player in allPlayers)
-            {
-                if (player != this)
-                {
-                    if (player.GetDistanceTraveled() > finalDistance)
-                        place++;
-                }
-            }
-
-            ShowResults(place, endRaceCanvas, placeText, resultText);
-        }
+    public void SetEndRaceUI(GameObject canvas, TMP_Text placeTextUI, TMP_Text resultTextUI, GameObject waitCanvas)
+    {
+        endRaceCanvas = canvas;
+        placeText = placeTextUI;
+        resultText = resultTextUI;
+        waitingCanvas = waitCanvas;
     }
 
     public float GetDistanceTraveled()
@@ -138,30 +133,37 @@ public class PlayerBehaviour : MonoBehaviour
 
     private int finalPlace = -1;
 
-    public void SetFinalPlace(int place)
+    private IEnumerator WaitAndShowEndScreen()
     {
-        finalPlace = place;
+        // Wait until UI references are not null
+        while (endRaceCanvas == null || placeText == null || resultText == null)
+        {
+            yield return null; // wait one frame
+        }
+
         ShowEndRaceScreen();
     }
-    public float GetTotalDistanceTravelled()
-    {
-        return transform.position.z; // or distance from start line
-    }
+
 
     private void ShowEndRaceScreen()
     {
-        int place = GetCurrentPlace();
-        string suffix = place == 1 ? "st" :
-                        place == 2 ? "nd" :
-                        place == 3 ? "rd" : "th";
+        if (endRaceCanvas == null || placeText == null || resultText == null)
+        {
+            Debug.LogWarning("End race UI references are missing!");
+            return;
+        }
 
-        placeText.text = $"You finished in {place}{suffix} place!";
-        resultText.text = place == 1 ? "You Win!" : "You Lose!";
-        resultText.color = place == 1 ? Color.green : Color.red;
+        string suffix = finalPlace == 1 ? "st" :
+                        finalPlace == 2 ? "nd" :
+                        finalPlace == 3 ? "rd" : "th";
 
+        placeText.text = $"You finished in {finalPlace}{suffix} place!";
+        resultText.text = finalPlace == 1 ? "You Win!" : "You Lose!";
+        resultText.color = finalPlace == 1 ? Color.green : Color.red;
+
+        waitingCanvas.SetActive(false);
         endRaceCanvas.SetActive(true);
     }
-
 
     void Update()
     {
@@ -340,6 +342,13 @@ public class PlayerBehaviour : MonoBehaviour
         }
 
         return place;
+    }
+
+    [PunRPC]
+    public void RPC_FinishRaceWithPlace(int place)
+    {
+        Debug.Log($"RPC_FinishRaceWithPlace called with place: {place} for player {photonView.Owner.NickName}");
+        FinishRace(place);
     }
 
 }

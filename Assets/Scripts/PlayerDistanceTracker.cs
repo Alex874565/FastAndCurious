@@ -9,7 +9,7 @@ public class PlayerDistanceTracker : MonoBehaviourPun
     void Start()
     {
         startPosition = transform.position;
-        RacePositionManager.Instance.RegisterPlayer(this); // te înregistrezi
+        RacePositionManager.Instance.RegisterPlayer(this);
     }
 
     void Update()

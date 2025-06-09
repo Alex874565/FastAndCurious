@@ -34,8 +34,9 @@ public class PlayerBehaviour : MonoBehaviour
     public int checkpointsPassed = 0;
     public float distanceToNextCheckpoint = 0f;
     public int currentPlace = 1;
-    public TMP_Text positionText; // Leg?m în Inspector
+    public TMP_Text positionText; // Leg?m ï¿½n Inspector
 
+    public AudioSource engineAudio;
 
     [HideInInspector]
     public float distanceTraveled = 0f;
@@ -54,6 +55,8 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField] private Transform rearLeftWheelTransform, rearRightWheelTransform;
 
     //private WheelControl[] wheels;
+
+    
 
     private void Awake()
     {
@@ -167,6 +170,18 @@ public class PlayerBehaviour : MonoBehaviour
             int place = GetCurrentPlace();
             if (positionText != null)
                 positionText.text = $"Locul t?u: {place}";
+        }
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            if (!engineAudio.isPlaying)
+            {
+                engineAudio.Play();
+            }
+        }
+
+        if (Input.GetKeyUp(KeyCode.W))
+        {
+            engineAudio.Stop();
         }
     }
 

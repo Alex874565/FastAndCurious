@@ -12,6 +12,12 @@ public class GameController : MonoBehaviourPunCallbacks
     void Start()
     {
         SpawnPlayer();
+
+        MusicManager music = FindObjectOfType<MusicManager>();
+        if (music != null)
+        {
+            music.StopMusic();
+        }
     }
 
     public void SpawnPlayer()

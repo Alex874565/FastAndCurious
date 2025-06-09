@@ -11,6 +11,13 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     public TMP_Text playerCount;
     public GameObject startButton;
 
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip clickSound;
+    [SerializeField] private Button StartRaceButton;
+    [SerializeField] private Button LeaveRoomButton;
+    [SerializeField] private Button CalculationsButton;
+    [SerializeField] private Button FormulasButton;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -30,6 +37,11 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     private void Update()
     {
         UpdatePlayerCount();
+    }
+
+    public void PlayClickSound()
+    {
+        audioSource.PlayOneShot(clickSound);
     }
 
     public void StartGame()

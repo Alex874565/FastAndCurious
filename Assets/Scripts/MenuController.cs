@@ -16,6 +16,11 @@ public class MenuController : MonoBehaviourPunCallbacks
     [SerializeField] private Button createButton;
     [SerializeField] private Button joinButton;
 
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip typingSound;
+    [SerializeField] private AudioClip clickSound;
+
+
     private void Awake()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -28,7 +33,19 @@ public class MenuController : MonoBehaviourPunCallbacks
         roomCode.interactable = false;
         joinButton.interactable = false;
         createButton.interactable = false;
+
+        usernameInput.onValueChanged.AddListener(_ => PlayTypingSound());
+        roomCode.onValueChanged.AddListener(_ => PlayTypingSound());
     }
+
+    private void PlayTypingSound()
+    {
+        if (!audioSource.isPlaying)
+        {
+            audioSource.PlayOneShot(typingSound);
+        }
+    }
+
 
     public override void OnConnectedToMaster()
     {
@@ -38,17 +55,28 @@ public class MenuController : MonoBehaviourPunCallbacks
 
     public void ChangeUsernameInput()
     {
-        if (usernameInput.text.Length > 3)
+        if (!audioSource.isPlaying && usernameInput.text.Length > 0)
+        {
+            audioSource.PlayOneShot(typingSound);
+        }
+
+        if (usernameInput.text.Length > 0)
         {
             roomCode.interactable = true;
             joinButton.interactable = true;
             createButton.interactable = true;
-        }else
+        }
+        else
         {
             roomCode.interactable = false;
             joinButton.interactable = false;
             createButton.interactable = false;
         }
+    }
+
+    public void PlayClickSound()
+    {
+        audioSource.PlayOneShot(clickSound);
     }
 
     public void JoinGame()

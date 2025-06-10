@@ -1140,6 +1140,7 @@ MonoBehaviour:
   frontRightWheelTransform: {fileID: 490622414767712695}
   rearLeftWheelTransform: {fileID: 637705665809516724}
   rearRightWheelTransform: {fileID: 2927471357576503160}
+  timeText: {fileID: 0}
 --- !u!114 &6622049020907523380
 MonoBehaviour:
   m_ObjectHideFlags: 0

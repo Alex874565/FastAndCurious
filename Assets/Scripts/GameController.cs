@@ -38,7 +38,7 @@ public class GameController : MonoBehaviourPunCallbacks
         int playerIndex = PhotonNetwork.LocalPlayer.ActorNumber - 1; // ActorNumber starts at 1
         float spacing = 3f; // How far apart each player should be
 
-        Vector3 baseSpawnPosition = new Vector3(5, 2, 31); // First player's position
+        Vector3 baseSpawnPosition = new Vector3(5, -1, 31); // First player's position
         Vector3 offset = new Vector3(0, 0, playerIndex * spacing); // Offset each by X
 
         Vector3 spawnPosition = baseSpawnPosition + offset;

@@ -1,84 +1,52 @@
 using Photon.Pun;
-using System.Collections;
+using Photon.Realtime;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Photon.Realtime;
 
 public class GameMenuController : MonoBehaviourPunCallbacks
 {
     public TMP_Text playerCount;
+    public TMP_Text roomCodeText;
+
+    public TMP_Text[] playerTexts; // Drag & Drop Player1, Player2, Player3, Player4 în Inspector
+
     public GameObject startButton;
 
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AudioClip clickSound;
+    [SerializeField] private AudioClip typingSound;
+
+    [SerializeField] private TMP_InputField lapsInput;
+
     [SerializeField] private Button StartRaceButton;
     [SerializeField] private Button LeaveRoomButton;
     [SerializeField] private Button CalculationsButton;
     [SerializeField] private Button FormulasButton;
 
     public static int Laps = 3; // Default
+    private bool isCategorySelected = false;
 
-    [SerializeField] private TMP_InputField lapsInput;
-
-    [SerializeField] private AudioClip typingSound;
-    
-
-    // Start is called before the first frame update
-    void Awake()
+    private void Awake()
     {
-        if (!PhotonNetwork.IsMasterClient)
-        {
-            // If the player is not the master client, disable the start game button
-            startButton.SetActive(false);
-        }
-        else
-        {
-            // If the player is the master client, enable the start game button
-            startButton.SetActive(true);
-        }
-
+        startButton.SetActive(PhotonNetwork.IsMasterClient);
         DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
     {
         lapsInput.onValueChanged.AddListener(_ => PlayTypingSound());
+        CalculationsButton.onClick.AddListener(() => SelectCategory("Calculations"));
+        FormulasButton.onClick.AddListener(() => SelectCategory("Formulas"));
+
+        UpdateRoomCode();
     }
 
-    
-
-    // Update is called once per frame
     private void Update()
     {
         UpdatePlayerCount();
-    }
-
-    public void OnLapInputChanged()
-    {
-        if (int.TryParse(lapsInput.text, out int inputLaps))
-        {
-            if (inputLaps < 1)
-            {
-                inputLaps = 1; // Clamp to minimum value
-                lapsInput.text = "1"; // Update field visually
-            }
-
-            Laps = inputLaps;
-            Debug.Log("Laps set to: " + Laps);
-        }
-        else
-        {
-            // If input is invalid (blank, etc), reset to default or 1
-            lapsInput.text = "1";
-            Laps = 1;
-        }
-    }
-
-    public void PlayClickSound()
-    {
-        audioSource.PlayOneShot(clickSound);
+        UpdatePlayerNames();
     }
 
     private void PlayTypingSound()
@@ -89,15 +57,93 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         }
     }
 
+    public void PlayClickSound()
+    {
+        audioSource.PlayOneShot(clickSound);
+    }
+
+    public void OnLapInputChanged()
+    {
+        if (int.TryParse(lapsInput.text, out int inputLaps))
+        {
+            if (inputLaps < 1)
+            {
+                inputLaps = 1;
+                lapsInput.text = "1";
+            }
+            Laps = inputLaps;
+        }
+        else
+        {
+            lapsInput.text = "1";
+            Laps = 1;
+        }
+    }
+
+    private void SelectCategory(string category)
+    {
+        isCategorySelected = true;
+        PlayClickSound();
+        Debug.Log("Category selected: " + category);
+    }
+
     public void StartGame()
     {
-        // Load the game scene
+        if (!isCategorySelected)
+        {
+            Debug.LogWarning("Please select a category before starting the game!");
+            return;
+        }
+
         PhotonNetwork.LoadLevel("Game");
     }
 
     public void UpdatePlayerCount()
     {
-        playerCount.text = PhotonNetwork.CurrentRoom.PlayerCount + "/" + PhotonNetwork.CurrentRoom.MaxPlayers + " players";
+        if (PhotonNetwork.CurrentRoom != null)
+        {
+            playerCount.text = PhotonNetwork.CurrentRoom.PlayerCount + "/" + PhotonNetwork.CurrentRoom.MaxPlayers + " players";
+        }
+    }
+
+    private void UpdatePlayerNames()
+    {
+        // Resetează textele la gol înainte de a popula
+        for (int i = 0; i < playerTexts.Length; i++)
+        {
+            playerTexts[i].text = "";
+        }
+
+        Player[] players = PhotonNetwork.PlayerList;
+        for (int i = 0; i < players.Length && i < playerTexts.Length; i++)
+        {
+            string displayName = players[i].NickName;
+            if (players[i] == PhotonNetwork.LocalPlayer)
+            {
+                displayName += " (YOU)";
+            }
+            playerTexts[i].text = displayName;
+        }
+    }
+
+    private void UpdateRoomCode()
+    {
+        if (PhotonNetwork.CurrentRoom != null)
+        {
+            roomCodeText.text = "Room Code: " + PhotonNetwork.CurrentRoom.Name;
+        }
+    }
+
+    public override void OnPlayerEnteredRoom(Player newPlayer)
+    {
+        UpdatePlayerNames();
+        UpdatePlayerCount();
+    }
+
+    public override void OnPlayerLeftRoom(Player otherPlayer)
+    {
+        UpdatePlayerNames();
+        UpdatePlayerCount();
     }
 
     public void LeaveRoom()

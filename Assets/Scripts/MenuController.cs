@@ -20,7 +20,6 @@ public class MenuController : MonoBehaviourPunCallbacks
     [SerializeField] private AudioClip typingSound;
     [SerializeField] private AudioClip clickSound;
 
-
     private void Awake()
     {
         PhotonNetwork.ConnectUsingSettings();
@@ -30,12 +29,10 @@ public class MenuController : MonoBehaviourPunCallbacks
     private void Start()
     {
         mainMenu.SetActive(true);
-        roomCode.interactable = false;
-        joinButton.interactable = false;
-        createButton.interactable = false;
+        SetButtonsInteractable(false);
 
-        usernameInput.onValueChanged.AddListener(_ => PlayTypingSound());
-        roomCode.onValueChanged.AddListener(_ => PlayTypingSound());
+        usernameInput.onValueChanged.AddListener(_ => { PlayTypingSound(); ValidateInputs(); });
+        roomCode.onValueChanged.AddListener(_ => { PlayTypingSound(); ValidateInputs(); });
     }
 
     private void PlayTypingSound()
@@ -46,32 +43,23 @@ public class MenuController : MonoBehaviourPunCallbacks
         }
     }
 
+    private void SetButtonsInteractable(bool state)
+    {
+        createButton.interactable = state;
+        joinButton.interactable = state;
+    }
+
+    private void ValidateInputs()
+    {
+        bool isUsernameValid = usernameInput.text.Length > 0;
+        bool isRoomCodeValid = roomCode.text.Length >= 3;
+        SetButtonsInteractable(isUsernameValid && isRoomCodeValid);
+    }
 
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connected to Master");
         PhotonNetwork.JoinLobby();
-    }
-
-    public void ChangeUsernameInput()
-    {
-        if (!audioSource.isPlaying && usernameInput.text.Length > 0)
-        {
-            audioSource.PlayOneShot(typingSound);
-        }
-
-        if (usernameInput.text.Length > 0)
-        {
-            roomCode.interactable = true;
-            joinButton.interactable = true;
-            createButton.interactable = true;
-        }
-        else
-        {
-            roomCode.interactable = false;
-            joinButton.interactable = false;
-            createButton.interactable = false;
-        }
     }
 
     public void PlayClickSound()

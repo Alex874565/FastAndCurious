@@ -17,6 +17,11 @@ public class PlayerBehaviour : MonoBehaviour
     public Renderer playerRenderer;
     public TMP_Text playerText;
 
+    [SerializeField]
+    private Color currentColor = Color.white; // Default la alb, va fi setată de rețea
+
+
+
     private float horizontalInput, verticalInput;
     private float currentSteerAngle, currentbreakForce;
     private bool isBreaking;
@@ -35,7 +40,7 @@ public class PlayerBehaviour : MonoBehaviour
     public int checkpointsPassed = 0;
     public float distanceToNextCheckpoint = 0f;
     public int currentPlace = 1;
-    public TMP_Text positionText; // Leg?m �n Inspector
+    public TMP_Text positionText; 
 
     public AudioSource engineAudio;
 
@@ -61,6 +66,8 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Awake()
     {
+      
+
         if (photonView.IsMine)
         {
             playerCamera.SetActive(true);
@@ -351,4 +358,50 @@ public class PlayerBehaviour : MonoBehaviour
         FinishRace(place);
     }
 
+
+
+
+
+
+    [PunRPC]
+    public void RPC_SetCarColor(float r, float g, float b)
+    {
+        // Setează culoarea local pentru acest jucător
+        currentColor = new Color(r, g, b);
+        ApplyCurrentColor(); // Aplică culoarea imediat
+    }
+
+    // Metodă helper pentru a aplica culoarea materialului
+    private void ApplyCurrentColor()
+    {
+        if (playerRenderer != null && playerRenderer.material != null)
+        {
+            // Asigură-te că materialul este instanțiat pentru a nu modifica materialul original din proiect
+            // sau folosește un material nou creat dacă vrei culori unice fără a modifica prefab-ul.
+            // Opțiunea 1: Modifică materialul existent (ar putea modifica materialul original dacă nu e instanțiat)
+            // playerRenderer.material.color = currentColor;
+
+            // Opțiunea 2: Creează o instanță nouă a materialului pentru a nu afecta alți jucători
+            // Aceasta este metoda recomandată dacă nu folosești materiale separate pentru fiecare culoare.
+            if (playerRenderer.material.HasProperty("_Color")) // Verifică dacă materialul are proprietatea _Color
+            {
+                // Creează o instanță nouă a materialului dacă nu a fost deja creată
+                if (playerRenderer.material != null && playerRenderer.material.name.Contains("(Instance)") == false)
+                {
+                    playerRenderer.material = new Material(playerRenderer.material); // Creează o copie a materialului
+                }
+                playerRenderer.material.color = currentColor;
+            }
+            else
+            {
+                Debug.LogWarning("Materialul " + playerRenderer.material.name + " nu are proprietatea '_Color'. Nu se poate seta culoarea.");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Player Renderer sau materialul nu este asignat pentru a seta culoarea mașinii pentru " + photonView.Owner.NickName);
+        }
+    }
+
 }
+

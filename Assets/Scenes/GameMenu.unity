@@ -525,8 +525,8 @@ MonoBehaviour:
   m_SpriteState:
     m_HighlightedSprite: {fileID: 21300000, guid: f6454a359a089014bae4eb345e7ac095,
       type: 3}
-    m_PressedSprite: {fileID: 21300000, guid: f6454a359a089014bae4eb345e7ac095, type: 3}
-    m_SelectedSprite: {fileID: 21300000, guid: f6454a359a089014bae4eb345e7ac095, type: 3}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -1252,8 +1252,8 @@ MonoBehaviour:
   m_SpriteState:
     m_HighlightedSprite: {fileID: 21300000, guid: be3faa41b9c8e9d4fafb0063a000c047,
       type: 3}
-    m_PressedSprite: {fileID: 21300000, guid: be3faa41b9c8e9d4fafb0063a000c047, type: 3}
-    m_SelectedSprite: {fileID: 21300000, guid: be3faa41b9c8e9d4fafb0063a000c047, type: 3}
+    m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
@@ -1739,6 +1739,10 @@ MonoBehaviour:
   LeaveRoomButton: {fileID: 547255950}
   CalculationsButton: {fileID: 71977162}
   FormulasButton: {fileID: 277189088}
+  formuleSelected: {fileID: 21300000, guid: be3faa41b9c8e9d4fafb0063a000c047, type: 3}
+  formuleUnselected: {fileID: 21300000, guid: 7bff00e396c63b44a83936038bbb69f9, type: 3}
+  calculeSelected: {fileID: 21300000, guid: f6454a359a089014bae4eb345e7ac095, type: 3}
+  calculeUnselected: {fileID: 21300000, guid: 9569d6330a3fd4f45aa1e7cccc82a811, type: 3}
 --- !u!1 &547255948
 GameObject:
   m_ObjectHideFlags: 0

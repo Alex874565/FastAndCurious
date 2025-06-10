@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: IntrebariDB
   m_EditorClassIdentifier: 
   intrebari:
-  - text: "C\xE2t face 7x6"
+  - text: ' 7x6'
     variante:
     - 42
     - 56
@@ -21,7 +21,7 @@ MonoBehaviour:
     - 35
     indexCorect: 0
     categorie: calcule
-  - text: "C\xE2t este 81 : 9?"
+  - text: '81 : 9'
     variante:
     - 7
     - 8
@@ -29,7 +29,7 @@ MonoBehaviour:
     - 6
     indexCorect: 2
     categorie: calcule
-  - text: "C\xE2t este 15 + 28?"
+  - text: 15 + 28
     variante:
     - 42
     - 43
@@ -37,7 +37,7 @@ MonoBehaviour:
     - 45
     indexCorect: 1
     categorie: calcule
-  - text: "C\xE2t este 100 \u2212 37?"
+  - text: "100 \u2212 37"
     variante:
     - 63
     - 67
@@ -45,7 +45,7 @@ MonoBehaviour:
     - 57
     indexCorect: 0
     categorie: calcule
-  - text: "C\xE2t face 4\xB2?"
+  - text: "4\xB2"
     variante:
     - 12
     - 8
@@ -53,15 +53,15 @@ MonoBehaviour:
     - 18
     indexCorect: 2
     categorie: calcule
-  - text: "C\xE2t este 3 \xD7 (2 + 5)?"
+  - text: "3 \xD7 (2 + 5)"
     variante:
     - 15
     - 18
     - 21
     - 9
-    indexCorect: 0
+    indexCorect: 2
     categorie: calcule
-  - text: "C\xE2t face 12 + 3 \xD7 2?"
+  - text: "12 + 3 \xD7 2"
     variante:
     - 24
     - 36
@@ -69,7 +69,7 @@ MonoBehaviour:
     - 18
     indexCorect: 3
     categorie: calcule
-  - text: "C\xE2t este 2\xB3?"
+  - text: " 2\xB3"
     variante:
     - 4
     - 9
@@ -77,7 +77,63 @@ MonoBehaviour:
     - 6
     indexCorect: 2
     categorie: calcule
-  - text: Aria cercului
+  - text: 9x5
+    variante:
+    - 40
+    - 45
+    - 50
+    - 14
+    indexCorect: 1
+    categorie: calcule
+  - text: '36 : 3 + 12'
+    variante:
+    - 23
+    - 32
+    - 12
+    - 24
+    indexCorect: 3
+    categorie: calcule
+  - text: "100 : (4 \xD7 5)"
+    variante:
+    - 8
+    - 6
+    - 5
+    - 2
+    indexCorect: 2
+    categorie: calcule
+  - text: "18 + 4 \xD7 3"
+    variante:
+    - 20
+    - 30
+    - 28
+    - 34
+    indexCorect: 1
+    categorie: calcule
+  - text: "(7 + 3)\xB2"
+    variante:
+    - 100
+    - 10
+    - 1000
+    - 90
+    indexCorect: 0
+    categorie: calcule
+  - text: "(6 + 2) \xD7 (5 \u2212 1)"
+    variante:
+    - 32
+    - 24
+    - 48
+    - 42
+    indexCorect: 0
+    categorie: calcule
+  - text: "90 \u2212 56"
+    variante:
+    - 34
+    - 24
+    - 44
+    - 56
+    indexCorect: 0
+    categorie: calcule
+  - text: Area of the circle
     variante:
     - "\u03C0 \xD7 r\xB2"
     - "2 \xD7 \u03C0 \xD7 r"
@@ -85,7 +141,7 @@ MonoBehaviour:
     - "(b \xD7 h)/2"
     indexCorect: 0
     categorie: formule
-  - text: "Perimetrul unui p\u0103trat este:"
+  - text: Perimeter of the square
     variante:
     - "2 \xD7 l"
     - "4 \xD7 l"
@@ -93,7 +149,7 @@ MonoBehaviour:
     - "l \xD7 L"
     indexCorect: 1
     categorie: formule
-  - text: Formula volumului unui cub
+  - text: Volume of the cube
     variante:
     - "L\xB3"
     - "6 \xD7 L\xB2"
@@ -101,7 +157,7 @@ MonoBehaviour:
     - "\u03C0 \xD7 r\xB2 \xD7 h"
     indexCorect: 0
     categorie: formule
-  - text: 'Ariei unui triunghi este:'
+  - text: Area of the triangle
     variante:
     - "a \xD7 b \xD7 c"
     - "\u03C0 \xD7 r\xB2"
@@ -109,7 +165,7 @@ MonoBehaviour:
     - "(b \xD7 h)/2"
     indexCorect: 3
     categorie: formule
-  - text: "Formula pentru calculul mediei a, b \u0219i c este:"
+  - text: Mean of a, b, c
     variante:
     - a + b + c
     - (a + b + c)/3
@@ -117,15 +173,15 @@ MonoBehaviour:
     - (a + b)/c
     indexCorect: 1
     categorie: formule
-  - text: 'Formula pentru aria unui dreptunghi este:'
+  - text: Area of the rectangle
     variante:
-    - "l \xD7 L"
+    - "l\u22C5w"
     - "(b \xD7 h)/2"
     - "2 \xD7 \u03C0 \xD7 r"
     - L + l
     indexCorect: 0
     categorie: formule
-  - text: 'Formula pentru perimetrul cercului este:'
+  - text: Circumference of the circle
     variante:
     - " r \xD7 r \xD7 \u03C0"
     - "4 \xD7 l"
@@ -133,7 +189,7 @@ MonoBehaviour:
     - "2 \xD7 \u03C0 \xD7 r"
     indexCorect: 3
     categorie: formule
-  - text: 'Formula pentru volumul unui cilindru este:'
+  - text: Volume of the cylinder
     variante:
     - "\u03C0 \xD7 r\xB2 \xD7 h"
     - "2 \xD7 \u03C0 \xD7 r \xD7 h"

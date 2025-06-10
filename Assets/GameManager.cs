@@ -16,6 +16,8 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private Intrebare intrebareCurenta;
     private Action onQuestionAnsweredCorrectly;
+    private List<Intrebare> intrebariDisponibile; // Lista de întrebări disponibile pentru categoria curentă
+    private List<Intrebare> intrebariFolosite; // Lista de întrebări deja folosite
 
     void Start()
     {
@@ -25,6 +27,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public void StartQuestion(Action callback)
     {
         onQuestionAnsweredCorrectly = callback;
+        intrebariFolosite = new List<Intrebare>(); // Resetează lista de întrebări folosite la fiecare început de sesiune
 
         string categorieGlobala = PhotonNetwork.CurrentRoom.CustomProperties[CategorieSyncManager.CATEGORIE_KEY] as string;
 
@@ -34,20 +37,41 @@ public class GameManager : MonoBehaviourPunCallbacks
             return;
         }
 
-        List<Intrebare> filtrate = intrebareDB.intrebari
+        intrebariDisponibile = intrebareDB.intrebari
             .Where(i => i.categorie == categorieGlobala)
             .ToList();
 
-        if (filtrate.Count == 0)
+        if (intrebariDisponibile.Count == 0)
         {
             Debug.LogWarning("Nu există întrebări pentru categoria: " + categorieGlobala);
             return;
         }
 
-        intrebareCurenta = filtrate[UnityEngine.Random.Range(0, filtrate.Count)];
-        AfiseazaIntrebarea();
+        GenerareSiAfisareIntrebareNoua();
     }
 
+    private void GenerareSiAfisareIntrebareNoua()
+    {
+        // Filtrează întrebările disponibile pentru a exclude cele deja folosite
+        List<Intrebare> intrebariRamase = intrebariDisponibile.Except(intrebariFolosite).ToList();
+
+        if (intrebariRamase.Count == 0)
+        {
+            Debug.LogWarning("Nu mai sunt întrebări disponibile pentru această categorie.");
+            // se reseteaza intrebarile folosite si genereaza una noua.
+            intrebariFolosite.Clear();
+            intrebariRamase = intrebariDisponibile.ToList(); // Reincarca toate intrebarile daca s-au epuizat
+            if (intrebariRamase.Count == 0) // O ultima verificare daca nu exista deloc întrebari
+            {
+                Debug.LogError("Nici o întrebare disponibilă chiar și după resetare. Verificați baza de date.");
+                return;
+            }
+        }
+
+        intrebareCurenta = intrebariRamase[UnityEngine.Random.Range(0, intrebariRamase.Count)];
+        intrebariFolosite.Add(intrebareCurenta); // Adauga intrebarea la lista de intrebari folosite
+        AfiseazaIntrebarea();
+    }
 
     [PunRPC]
     void RPC_TrimiteIntrebare(string text, string[] variante, int indexCorect, string categorie)
@@ -87,7 +111,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
         else
         {
-            Debug.Log("Greșit!");
+            Debug.Log("Greșit! Se încarcă o nouă întrebare...");
+            // Dacă răspunsul este greșit, generează și afișează o nouă întrebare
+            GenerareSiAfisareIntrebareNoua();
         }
     }
 }
@@ -101,10 +127,7 @@ public class GameManager : MonoBehaviourPunCallbacks
 
 
 
-
-
-
-
+//
 
 //using System.Collections;
 //using System.Collections.Generic;

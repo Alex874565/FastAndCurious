@@ -2382,6 +2382,7 @@ MonoBehaviour:
   playerPrefab: {fileID: 4757503058545864956, guid: 7a70bc9e358e8d444ad2e29c02d61b05,
     type: 3}
   sceneCamera: {fileID: 1429791063}
+  gameManager: {fileID: 0}
 --- !u!114 &352087508
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5397,7 +5398,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: 1f49ef9f6eb5c694396820accd7c8196, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.134
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -6086,6 +6087,15 @@ MonoBehaviour:
   pauseMenu: {fileID: 529339430}
   resumeButton: {fileID: 538516573}
   quitButton: {fileID: 690758786}
+  availableCarColors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 1, g: 0, b: 1, a: 1}
+  - {r: 0, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0.5, b: 0, a: 1}
+  - {r: 0.5, g: 0, b: 0.5, a: 1}
 --- !u!4 &823247276
 Transform:
   m_ObjectHideFlags: 0
@@ -6601,6 +6611,15 @@ MonoBehaviour:
   pauseMenu: {fileID: 0}
   resumeButton: {fileID: 0}
   quitButton: {fileID: 0}
+  availableCarColors:
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 1, g: 0, b: 1, a: 1}
+  - {r: 0, g: 1, b: 1, a: 1}
+  - {r: 1, g: 0.5, b: 0, a: 1}
+  - {r: 0.5, g: 0, b: 0.5, a: 1}
 --- !u!1 &908635749
 GameObject:
   m_ObjectHideFlags: 0

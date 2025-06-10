@@ -1,12 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MusicManager : MonoBehaviour
 {
     private static MusicManager instance;
 
     [SerializeField] private AudioSource musicSource;
+
+    [SerializeField] private Button playButton;
+    [SerializeField] private Button quitButton;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip clickSound;
 
     private void Awake()
     {
@@ -32,5 +38,12 @@ public class MusicManager : MonoBehaviour
         musicSource.Stop();
         Destroy(gameObject); // Optional: Clean up for future
     }
+
+    public void PlayClickSound()
+    {
+        Debug.Log("PlayClickSound triggered");
+        audioSource.PlayOneShot(clickSound);
+    }
+
 }
 

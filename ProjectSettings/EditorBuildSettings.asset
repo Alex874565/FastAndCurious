@@ -8,9 +8,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/OutdoorsScene.unity
     guid: 8124e5870f4fd4c779e7a5f994e84ad1
-  - enabled: 0
-    path: Assets/Scenes/CategoriesMenu.unity
-    guid: e1d233202525a33489ef7c0fabe2a8d7
+  - enabled: 1
+    path: Assets/Scenes/StartMenu.unity
+    guid: dbf3212578a8d2343801e26e2d57eea1
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: ccc2135898a3f8b43b98d846fdf2c975
@@ -20,6 +20,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Game.unity
     guid: 3012f8508d8cbd24286654247a89887c
+  - enabled: 0
+    path: Assets/Scenes/CategoriesMenu.unity
+    guid: e1d233202525a33489ef7c0fabe2a8d7
   - enabled: 0
     path: Assets/Scenes/GameScene.unity
     guid: 01bb865cf3eb24f47a345e3a28c7c657

@@ -7,11 +7,23 @@ using System.Linq;
 public class RacePositionManager : MonoBehaviour
 {
     public static RacePositionManager Instance;
+    public static TMPro.TMP_Text timeText;
+    private float time;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+    }
+
+    private void Start()
+    {
+        time = 0f;
+    }
+
+    private void Update()
+    {
+        
     }
 
     public int GetPlayerPosition()

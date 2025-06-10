@@ -62,11 +62,13 @@ public class PlayerBehaviour : MonoBehaviour
 
     //private WheelControl[] wheels;
 
-    
+    private float time = 0f; // Time in milliseconds
+    public TMP_Text timeText; // Reference to the UI text for time display
+
+
 
     private void Awake()
     {
-      
 
         if (photonView.IsMine)
         {
@@ -88,6 +90,12 @@ public class PlayerBehaviour : MonoBehaviour
             playerCinemachine.Follow = followPoint;
             playerCinemachine.LookAt = followPoint;
             playerText.color = Color.green;
+            time = 0;
+            timeText = GameObject.Find("Time").GetComponent<TMP_Text>();
+            if (timeText != null)
+            {
+                timeText.text = "Time: 0:000"; // Initialize time display
+            }
         }
         else
         {
@@ -172,10 +180,33 @@ public class PlayerBehaviour : MonoBehaviour
         endRaceCanvas.SetActive(true);
     }
 
+    private void UpdateTime()
+    {
+        // Accumulate time in milliseconds
+        time += Time.deltaTime * 1000f; // Convert seconds (Time.deltaTime) to milliseconds
+
+        // Calculate total seconds from accumulated milliseconds
+        int totalSeconds = (int)(time / 1000f);
+
+        // Calculate total minutes
+        int totalMinutes = totalSeconds / 60;
+
+        // Calculate remaining seconds after extracting minutes
+        int remainingSeconds = totalSeconds % 60;
+
+        if (timeText != null)
+        {
+            // Display time in "minutes:seconds" format
+            // Ensure seconds are padded with a leading zero if less than 10
+            timeText.text = $"Time: {totalMinutes}:{remainingSeconds:D2}";
+        }
+    }
+
     void Update()
     {
         if (photonView.IsMine)
         {
+            UpdateTime();
             int place = GetCurrentPlace();
             if (positionText != null)
                 positionText.text = $"Locul t?u: {place}";

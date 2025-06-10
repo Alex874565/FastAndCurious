@@ -25,11 +25,19 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     [SerializeField] private Button CalculationsButton;
     [SerializeField] private Button FormulasButton;
 
+    [SerializeField] private Sprite formuleSelected;
+    [SerializeField] private Sprite formuleUnselected;
+    [SerializeField] private Sprite calculeSelected;
+    [SerializeField] private Sprite calculeUnselected;
+
     public static int Laps = 3; // Default
     private bool isCategorySelected = false;
 
+    private string category;
+
     private void Awake()
     {
+        category = null;
         startButton.SetActive(PhotonNetwork.IsMasterClient);
         DontDestroyOnLoad(gameObject);
     }
@@ -37,11 +45,28 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     private void Start()
     {
         lapsInput.onValueChanged.AddListener(_ => PlayTypingSound());
-        CalculationsButton.onClick.AddListener(() => SelectCategory("Calculations"));
-        FormulasButton.onClick.AddListener(() => SelectCategory("Formulas"));
+
+        bool isMaster = PhotonNetwork.IsMasterClient;
+        CalculationsButton.interactable = isMaster;
+        FormulasButton.interactable = isMaster;
+
+        if (!isMaster)
+        {
+            CalculationsButton.transition = Selectable.Transition.None;
+            FormulasButton.transition = Selectable.Transition.None;
+        }
+
 
         UpdateRoomCode();
+
+        // Force update in case we joined a room with a category already selected
+        string initialCategory = CategorieSyncManager.GetCategorie();
+        if (!string.IsNullOrEmpty(initialCategory))
+        {
+            UpdateCategory(initialCategory);
+        }
     }
+
 
     private void Update()
     {
@@ -84,7 +109,31 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     {
         isCategorySelected = true;
         PlayClickSound();
+        if (category == "calcule")
+        {
+            CalculationsButton.interactable = false;
+            FormulasButton.interactable = true;
+            CalculationsButton.image.sprite = calculeSelected;// Update sprite if needed
+            FormulasButton.image.sprite = formuleUnselected;
+        }
+        else if (category == "formule")
+        {
+            CalculationsButton.interactable = true;
+            FormulasButton.interactable = false;
+            FormulasButton.image.sprite = formuleSelected; // Update sprite if needed
+            CalculationsButton.image.sprite = calculeUnselected;// Update sprite if needed
+        }
         Debug.Log("Category selected: " + category);
+    }
+
+    private void UpdateCategory(string new_category)
+    {
+        if(new_category != null && new_category != category)
+        {
+            isCategorySelected = true;
+            category = new_category;
+            SelectCategory(category);
+        }
     }
 
     public void StartGame()
@@ -151,4 +200,31 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         PhotonNetwork.LeaveRoom();
         PhotonNetwork.LoadLevel("MainMenu");
     }
+
+    public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable changedProps)
+    {
+        if (changedProps.ContainsKey(CategorieSyncManager.CATEGORIE_KEY))
+        {
+            string newCategory = changedProps[CategorieSyncManager.CATEGORIE_KEY]?.ToString();
+            if (!string.IsNullOrEmpty(newCategory))
+            {
+                UpdateCategory(newCategory); // React to property change
+            }
+        }
+    }
+
+    void DisableButtonVisuals(Button button, Sprite sprite)
+    {
+        var spriteState = new SpriteState
+        {
+            highlightedSprite = sprite,
+            pressedSprite = sprite,
+            selectedSprite = sprite,
+            disabledSprite = sprite
+        };
+        button.spriteState = spriteState;
+        button.image.sprite = sprite;
+        button.interactable = false;
+    }
+
 }

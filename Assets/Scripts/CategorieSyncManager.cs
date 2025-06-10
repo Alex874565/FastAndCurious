@@ -60,4 +60,16 @@ public void AlegeFormule()
         prop[CATEGORIE_KEY] = categorie;
         PhotonNetwork.CurrentRoom.SetCustomProperties(prop);
     }
+
+    public static string GetCategorie()
+    {
+        if (PhotonNetwork.CurrentRoom == null) return "";
+
+        if (PhotonNetwork.CurrentRoom.CustomProperties.TryGetValue(CATEGORIE_KEY, out object value))
+        {
+            return value.ToString();
+        }
+
+        return "";
+    }
 }

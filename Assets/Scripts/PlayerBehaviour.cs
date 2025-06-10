@@ -65,7 +65,7 @@ public class PlayerBehaviour : MonoBehaviour
     private float time = 0f; // Time in milliseconds
     public TMP_Text timeText; // Reference to the UI text for time display
 
-
+    private bool timeStarted;
 
     private void Awake()
     {
@@ -79,6 +79,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     private void Start()
     {
+        timeStarted = false;
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>();
         photonView = GetComponent<PhotonView>();
@@ -94,7 +95,7 @@ public class PlayerBehaviour : MonoBehaviour
             timeText = GameObject.Find("Time").GetComponent<TMP_Text>();
             if (timeText != null)
             {
-                timeText.text = "Time: 0:000"; // Initialize time display
+                timeText.text = "Time: 0:00"; // Initialize time display
             }
         }
         else
@@ -194,8 +195,14 @@ public class PlayerBehaviour : MonoBehaviour
         // Calculate remaining seconds after extracting minutes
         int remainingSeconds = totalSeconds % 60;
 
-        if (timeText != null)
+        if (timeText != null && (totalSeconds >= 5 || timeStarted))
         {
+            if (!timeStarted)
+            {
+                timeStarted = true;
+                time -= 5000;
+                remainingSeconds = 0;
+            }
             // Display time in "minutes:seconds" format
             // Ensure seconds are padded with a leading zero if less than 10
             timeText.text = $"Time: {totalMinutes}:{remainingSeconds:D2}";

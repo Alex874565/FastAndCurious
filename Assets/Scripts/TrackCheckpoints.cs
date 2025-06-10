@@ -24,6 +24,12 @@ public class TrackCheckpoints : MonoBehaviour
 
     public TMP_Text countdownText;
 
+    private int totalLaps;  // How many laps are needed to finish
+
+    private List<int> currentLapList = new List<int>(); // One entry per player
+
+    [SerializeField] private TMP_Text lapText;
+
 
     private void Awake()
     {
@@ -34,6 +40,8 @@ public class TrackCheckpoints : MonoBehaviour
             CheckpointSingle checkpointSingle = checkpointSingleTransform.GetComponent<CheckpointSingle>();
             checkpointSingle.SetTrackCheckpoints(this);
         }
+
+        totalLaps = GameMenuController.Laps;
     }
 
     private void Start()
@@ -43,6 +51,9 @@ public class TrackCheckpoints : MonoBehaviour
 
     private void RegisterAllPlayers()
     {
+        
+
+
         carTransformList.Clear();
         nextCheckpointSingleIndexList.Clear();
 
@@ -57,12 +68,18 @@ public class TrackCheckpoints : MonoBehaviour
                 carTransformList.Add(player.transform);
                 nextCheckpointSingleIndexList.Add(0);
 
+                currentLapList.Add(0); // Start at lap 0
+
                 PlayerBehaviour pb = player.GetComponent<PlayerBehaviour>();
                 if (pb != null)
                 {
                     pb.SetEndRaceUI(endRaceCanvas, placeText, resultText, waitingCanvas);
                 }
+
+                lapText.text = $"Lap: 1/{totalLaps}";
             }
+
+            
 
         }
 
@@ -93,16 +110,36 @@ public class TrackCheckpoints : MonoBehaviour
             // Check if it's the final checkpoint
             if (checkpointSingle.CompareTag("Finish"))
             {
-                Debug.Log("Player finished the race!");
+                currentLapList[carIndex]++;
 
-                PlayerBehaviour pb = carTransform.GetComponent<PlayerBehaviour>();
-                if (pb != null && pb.photonView.IsMine)
+                Debug.Log($"Player {carTransform.name} completed lap {currentLapList[carIndex]}");
+                
+                if (carTransform.GetComponent<PhotonView>().IsMine)
                 {
-                    waitingCanvas.SetActive(true);
-                    // Report finish to RaceResultsManager
-                    RaceResultsManager.Instance.ReportFinish(pb.photonView.Owner.ActorNumber, pb.GetDistanceTraveled());
+                    lapText.text = $"Lap: {currentLapList[carIndex] + 1}/{totalLaps}";
+                }
+
+                if (currentLapList[carIndex] < totalLaps)
+                {
+                    foreach (var checkpoint in checkpointSingleList)
+                    {
+                        checkpoint.ResetCheckpoint();
+                    }
+                }
+
+                if (currentLapList[carIndex] >= totalLaps)
+                {
+                    Debug.Log("Player finished the race!");
+
+                    PlayerBehaviour pb = carTransform.GetComponent<PlayerBehaviour>();
+                    if (pb != null && pb.photonView.IsMine)
+                    {
+                        waitingCanvas.SetActive(true);
+                        RaceResultsManager.Instance.ReportFinish(pb.photonView.Owner.ActorNumber, pb.GetDistanceTraveled());
+                    }
                 }
             }
+
 
             nextCheckpointSingleIndexList[carIndex] = (nextCheckpointSingleIndex + 1) % checkpointSingleList.Count;
             OnPlayerCorrectCheckpoint?.Invoke(this, EventArgs.Empty);

@@ -30,8 +30,10 @@ public class CheckpointSingle : MonoBehaviour
     {
         var playerBehaviour = other.GetComponent<PlayerBehaviour>();
 
-        if (playerBehaviour && playerBehaviour.photonView.IsMine)
+        if (playerBehaviour && playerBehaviour.photonView.IsMine && !triggeredThisLap)
         {
+            triggeredThisLap = true;
+
             trackCheckpoints.PlayerThroughCheckpoint(this, other.transform);
 
             if (!CompareTag("NoQuestion") && !CompareTag("Finish") && !wrongCheckpoint)
@@ -48,6 +50,15 @@ public class CheckpointSingle : MonoBehaviour
         }
     }
 
+
+    private bool triggeredThisLap = false;
+
+    public void ResetCheckpoint()
+    {
+        triggeredThisLap = false;
+        wrongCheckpoint = false;
+        Hide(); // Or Show() if you want it visible at lap start
+    }
 
 
     public void SetTrackCheckpoints(TrackCheckpoints trackCheckpoints)

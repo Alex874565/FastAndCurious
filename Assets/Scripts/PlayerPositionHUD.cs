@@ -32,7 +32,7 @@ public class PlayerPositionHUD : MonoBehaviourPun
         if (RacePositionManager.Instance != null)
         {
             int position = RacePositionManager.Instance.GetPlayerPosition();
-            positionText.text = $"Locul: {position}";
+            positionText.text = $"Place: {position}";
         }
     }
 

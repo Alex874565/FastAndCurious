@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System;
 using Photon.Pun;
+using Photon.Realtime;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameManager : MonoBehaviourPunCallbacks
@@ -15,15 +16,17 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     [SerializeField] private GameObject questionCanvas;
 
+    [Header("Pause Menu")]
+    [SerializeField] private GameObject pauseMenu;
+    [SerializeField] private Button resumeButton;
+    [SerializeField] private Button quitButton;
+
     private Intrebare intrebareCurenta;
     private Action onQuestionAnsweredCorrectly;
-    private List<Intrebare> intrebariDisponibile; // Lista de întrebări disponibile pentru categoria curentă
-    private List<Intrebare> intrebariFolosite; // Lista de întrebări deja folosite
+    private List<Intrebare> intrebariDisponibile;
+    private List<Intrebare> intrebariFolosite;
 
-
-
-
-
+    private bool isPaused = false;
 
     [Header("Car Colors")]
     public List<Color> availableCarColors = new List<Color>()
@@ -38,23 +41,62 @@ public class GameManager : MonoBehaviourPunCallbacks
         new Color(0.5f, 0f, 0.5f) // Purple
     };
 
-
-
-    // O cheie custom pentru proprietățile jucătorilor, pentru a stoca indexul culorii
     public const string PLAYER_COLOR_INDEX_KEY = "PlayerColorIndex";
-
-
-
 
     void Start()
     {
         questionCanvas.SetActive(false);
+        pauseMenu.SetActive(false);
+
+        resumeButton.onClick.RemoveAllListeners();
+        resumeButton.onClick.AddListener(ResumeGame);
+
+        quitButton.onClick.RemoveAllListeners();
+        quitButton.onClick.AddListener(QuitGame);
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Debug.Log("ESC Pressed");
+            if (!isPaused)
+            {
+                PauseGame();
+            }
+            else
+            {
+                ResumeGame();
+            }
+        }
+    }
+
+    private void PauseGame()
+    {
+        isPaused = true;
+        Time.timeScale = 0f;
+        pauseMenu.SetActive(true);
+    }
+
+    private void ResumeGame()
+    {
+        pauseMenu.SetActive(false);
+        Time.timeScale = 1f;
+        isPaused = false;
+    }
+
+    private void QuitGame()
+    {
+        Time.timeScale = 1f;
+        PhotonNetwork.LeaveRoom();
+        PhotonNetwork.LoadLevel("GameMenu"); // asigură-te că această scenă există
+    }
+
+    // Gestionare întrebări
     public void StartQuestion(Action callback)
     {
         onQuestionAnsweredCorrectly = callback;
-        intrebariFolosite = new List<Intrebare>(); // Resetează lista de întrebări folosite la fiecare început de sesiune
+        intrebariFolosite = new List<Intrebare>();
 
         string categorieGlobala = PhotonNetwork.CurrentRoom.CustomProperties[CategorieSyncManager.CATEGORIE_KEY] as string;
 
@@ -79,24 +121,16 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     private void GenerareSiAfisareIntrebareNoua()
     {
-        // Filtrează întrebările disponibile pentru a exclude cele deja folosite
         List<Intrebare> intrebariRamase = intrebariDisponibile.Except(intrebariFolosite).ToList();
 
         if (intrebariRamase.Count == 0)
         {
-            Debug.LogWarning("Nu mai sunt întrebări disponibile pentru această categorie.");
-            // se reseteaza intrebarile folosite si genereaza una noua.
             intrebariFolosite.Clear();
-            intrebariRamase = intrebariDisponibile.ToList(); // Reincarca toate intrebarile daca s-au epuizat
-            if (intrebariRamase.Count == 0) // O ultima verificare daca nu exista deloc întrebari
-            {
-                Debug.LogError("Nici o întrebare disponibilă chiar și după resetare. Verificați baza de date.");
-                return;
-            }
+            intrebariRamase = intrebariDisponibile.ToList();
         }
 
         intrebareCurenta = intrebariRamase[UnityEngine.Random.Range(0, intrebariRamase.Count)];
-        intrebariFolosite.Add(intrebareCurenta); // Adauga intrebarea la lista de intrebari folosite
+        intrebariFolosite.Add(intrebareCurenta);
         AfiseazaIntrebarea();
     }
 
@@ -139,35 +173,28 @@ public class GameManager : MonoBehaviourPunCallbacks
         else
         {
             Debug.Log("Greșit! Se încarcă o nouă întrebare...");
-            // Dacă răspunsul este greșit, generează și afișează o nouă întrebare
             GenerareSiAfisareIntrebareNoua();
         }
     }
 
-
-
-
-
-    public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
+    // Photon Events: Player Color Management
+    public override void OnPlayerEnteredRoom(Player newPlayer)
     {
-       
         if (PhotonNetwork.IsMasterClient)
         {
             AssignUniqueColorToPlayer(newPlayer);
         }
     }
 
- 
     public override void OnJoinedRoom()
     {
-      
         if (PhotonNetwork.IsMasterClient)
         {
             AssignUniqueColorToPlayer(PhotonNetwork.LocalPlayer);
         }
     }
 
-    private void AssignUniqueColorToPlayer(Photon.Realtime.Player targetPlayer)
+    private void AssignUniqueColorToPlayer(Player targetPlayer)
     {
         List<int> usedColorIndexes = new List<int>();
         foreach (var p in PhotonNetwork.CurrentRoom.Players.Values)
@@ -191,7 +218,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (assignedColorIndex == -1)
         {
             Debug.LogWarning("Nu mai sunt culori unice disponibile. Reutilizăm culori.");
-            assignedColorIndex = UnityEngine.Random.Range(0, availableCarColors.Count); 
+            assignedColorIndex = UnityEngine.Random.Range(0, availableCarColors.Count);
         }
 
         Hashtable playerProps = new Hashtable();
@@ -199,10 +226,9 @@ public class GameManager : MonoBehaviourPunCallbacks
         targetPlayer.SetCustomProperties(playerProps);
 
         Debug.Log($"Master Client a atribuit culoarea {availableCarColors[assignedColorIndex]} (index {assignedColorIndex}) jucătorului {targetPlayer.NickName}");
-
     }
 
-    public void AssignCarColorOnInstantiate(GameObject playerCarGameObject, Photon.Realtime.Player playerOwner)
+    public void AssignCarColorOnInstantiate(GameObject playerCarGameObject, Player playerOwner)
     {
         PlayerBehaviour playerBehaviour = playerCarGameObject.GetComponent<PlayerBehaviour>();
         if (playerBehaviour != null)
@@ -223,7 +249,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             }
             else
             {
-                Debug.LogWarning($"Jucătorul {playerOwner.NickName} nu are o proprietate de culoare setată. Atribuim o culoare implicită sau aleatorie.");
+                Debug.LogWarning($"Jucătorul {playerOwner.NickName} nu are o proprietate de culoare setată. Atribuim o culoare aleatorie.");
                 Color fallbackColor = new Color(UnityEngine.Random.value, UnityEngine.Random.value, UnityEngine.Random.value);
                 playerBehaviour.photonView.RPC("RPC_SetCarColor", RpcTarget.AllBuffered, fallbackColor.r, fallbackColor.g, fallbackColor.b);
             }
@@ -234,128 +260,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         }
     }
 
-    public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+    public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         Debug.Log($"Jucătorul {otherPlayer.NickName} a părăsit camera.");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-//
-
-//using System.Collections;
-//using System.Collections.Generic;
-//using System.Linq;
-//using TMPro;
-//using UnityEngine;
-//using UnityEngine.UI;
-//using System;
-//using Photon.Pun;
-
-
-//public class GameManager : MonoBehaviour
-//{
-//    public IntrebareData intrebareDB;
-//    public TMP_Text textIntrebare;
-//    public Button[] butoaneRaspuns;
-
-//    [SerializeField] private GameObject questionCanvas;
-
-//    private Intrebare intrebareCurenta;
-//    private Action onQuestionAnsweredCorrectly;
-//    private List<Intrebare> filtrate;
-
-//    void Start()
-//    {
-//        questionCanvas.SetActive(false);
-//        //StartCoroutine(LoopIntrebari());
-//    }
-
-//    IEnumerator LoopIntrebari()
-//    {
-//        while (true)
-//        {
-//            yield return new WaitForSeconds(10f); // așteaptă 10 secunde
-
-//            Time.timeScale = 0f;
-//            questionCanvas.SetActive(true);
-
-//            StartQuestion(() =>
-//            {
-//                questionCanvas.SetActive(false);
-//                Time.timeScale = 1f;
-//            });
-
-//            while (questionCanvas.activeSelf)
-//            {
-//                yield return null; // așteaptă până când canvas-ul este dezactivat
-//            }
-//        }
-//    }
-
-//    public void StartQuestion(Action callback)
-//    {
-//        Debug.Log("StartQuestion called");
-//        onQuestionAnsweredCorrectly = callback;
-
-//        string categorie = PhotonNetwork.CurrentRoom.CustomProperties[CategorieSyncManager.CATEGORIE_KEY] as string;
-
-//        if (string.IsNullOrEmpty(categorie))
-//        {
-//            Debug.LogWarning("Categoria nu este setată în Custom Properties!");
-//            return;
-//        }
-
-//        List<Intrebare> filtrate = intrebareDB.intrebari
-//            .Where(i => i.categorie == categorie)
-//            .ToList();
-
-
-//        if (filtrate.Count == 0)
-//        {
-//            Debug.LogWarning("Nu există întrebări pentru categoria selectată: " + GameSettings.CategorieSelectata);
-//            return;
-//        }
-//        Debug.Log("Filtrate: " + filtrate.Count);
-
-//        intrebareCurenta = filtrate[UnityEngine.Random.Range(0, filtrate.Count)];
-//        AfiseazaIntrebarea();
-//    }
-
-//    void AfiseazaIntrebarea()
-//    {
-//        textIntrebare.text = intrebareCurenta.text;
-
-//        for (int i = 0; i < butoaneRaspuns.Length; i++)
-//        {
-//            int index = i;
-//            butoaneRaspuns[i].GetComponentInChildren<TMP_Text>().text = intrebareCurenta.variante[i];
-//            butoaneRaspuns[i].onClick.RemoveAllListeners();
-//            butoaneRaspuns[i].onClick.AddListener(() => VerificaRaspuns(index));
-//        }
-//    }
-
-//    void VerificaRaspuns(int indexAles)
-//    {
-//        if (indexAles == intrebareCurenta.indexCorect)
-//        {
-//            Debug.Log("Corect!");
-//            onQuestionAnsweredCorrectly?.Invoke();
-//        }
-//        else
-//        {
-//            intrebareCurenta = filtrate[UnityEngine.Random.Range(0, intrebareDB.intrebari.Count)];
-//            AfiseazaIntrebarea();
-//            Debug.Log("Greșit!");
-//        }
-//    }
-//}

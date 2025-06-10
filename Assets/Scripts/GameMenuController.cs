@@ -40,28 +40,36 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     public static int Laps = 3; // Variabila statică, acum va fi sincronizată
     private bool isCategorySelected = false; // Flag care indică dacă o categorie a fost selectată
 
-    private string currentCategory; // Variabila locală pentru categoria curentă (redenumită pentru a evita conflict cu o metodă)
+    private string currentCategory; // Variabila locală pentru categoria curentă
+
+    private bool isLoadingScene = false; // Flag pentru a preveni încărcări multiple ale scenei
 
     private void Awake()
     {
         currentCategory = null;
+
         // Asigură-te că lapsInput este interactiv doar pentru Master Client
         if (lapsInput != null)
         {
             lapsInput.interactable = PhotonNetwork.IsMasterClient;
         }
 
-        startButton.SetActive(PhotonNetwork.IsMasterClient); // Doar Master Client-ul vede butonul de Start
-        // Nu DontDestroyOnLoad(gameObject); dacă este un UI specific lobby-ului și se distruge la schimbarea scenei.
+        // Butonul de Start este activ doar pentru Master Client
+        if (startButton != null)
+        {
+            startButton.SetActive(PhotonNetwork.IsMasterClient);
+        }
+
+        // COMENTAT/ȘTERS: Nu DontDestroyOnLoad(gameObject); pentru un controller specific scenei de lobby.
         // Dacă acest script controlează UI-ul care se distruge, nu are sens să-l păstrezi.
-        // Dacă GameMenuController este un manager global care persistă, atunci păstrează-l.
-        // Pentru un UI de Lobby care dispare la StartGame, scoate DontDestroyOnLoad.
-        // Presupunând că GameMenuController este un script al scenei de Lobby și se distruge la schimbarea scenei.
-        // Dacă nu se distruge, atunci ar putea intra în conflict cu alte scripturi de UI din scena de joc.
+        // DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
     {
+        // Asigură-te că isLoadingScene este false la începutul scenei de lobby
+        isLoadingScene = false;
+
         // Adaugă un listener pentru sunetul de tastare când textul din lapsInput se schimbă
         if (lapsInput != null)
         {
@@ -69,7 +77,7 @@ public class GameMenuController : MonoBehaviourPunCallbacks
             lapsInput.onValueChanged.AddListener(_ => PlayTypingSound()); // Sunetul rămâne
         }
 
-        // Doar Master Client-ul poate interacționa cu butoanele de selecție a categoriei
+        // Butoanele de categorie sunt interactive doar pentru Master Client
         bool isMaster = PhotonNetwork.IsMasterClient;
         if (CalculationsButton != null) CalculationsButton.interactable = isMaster;
         if (FormulasButton != null) FormulasButton.interactable = isMaster;
@@ -78,13 +86,18 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         if (CalculationsButton != null) CalculationsButton.onClick.AddListener(() => OnCategoryButtonClicked("calcule"));
         if (FormulasButton != null) FormulasButton.onClick.AddListener(() => OnCategoryButtonClicked("formule"));
 
-
         // Dezactivează tranzițiile vizuale pentru non-Master Clients (pentru a evita efecte nedorite)
         if (!isMaster)
         {
             if (CalculationsButton != null) CalculationsButton.transition = Selectable.Transition.None;
             if (FormulasButton != null) FormulasButton.transition = Selectable.Transition.None;
         }
+        else // Pentru Master Client, asigură-te că tranzițiile sunt active
+        {
+            if (CalculationsButton != null) CalculationsButton.transition = Selectable.Transition.ColorTint;
+            if (FormulasButton != null) FormulasButton.transition = Selectable.Transition.ColorTint;
+        }
+
 
         UpdateRoomCode(); // Actualizează codul camerei
 
@@ -92,15 +105,24 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         if (errorMsg != null)
             errorMsg.SetActive(false);
 
-        // La intrarea în cameră, sincronizează setările inițiale de la Master Client
-        // Verifică proprietățile camerei pentru Laps și Category
+        // La intrarea în cameră (sau la încărcarea scenei de lobby), sincronizează setările inițiale de la Master Client
         if (PhotonNetwork.CurrentRoom != null)
         {
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(LAPS_KEY))
             {
                 Laps = (int)PhotonNetwork.CurrentRoom.CustomProperties[LAPS_KEY];
-                lapsInput.text = Laps.ToString(); // Actualizează vizual lapsInput
+                if (lapsInput != null) lapsInput.text = Laps.ToString(); // Actualizează vizual lapsInput
             }
+            else // Dacă nu există Laps în proprietățile camerei, setează-l (doar Master Client-ul)
+            {
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    Hashtable initialLapsProps = new Hashtable();
+                    initialLapsProps[LAPS_KEY] = Laps; // Folosește valoarea default din variabila statică
+                    PhotonNetwork.CurrentRoom.SetCustomProperties(initialLapsProps);
+                }
+            }
+
             if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CATEGORIE_KEY))
             {
                 string initialCategory = PhotonNetwork.CurrentRoom.CustomProperties[CATEGORIE_KEY]?.ToString();
@@ -109,14 +131,17 @@ public class GameMenuController : MonoBehaviourPunCallbacks
                     UpdateCategoryUI(initialCategory); // Actualizează vizual categoria
                 }
             }
+            else // Dacă nu există Category în proprietățile camerei, setează-l (doar Master Client-ul)
+            {
+                if (PhotonNetwork.IsMasterClient && string.IsNullOrEmpty(currentCategory))
+                {
+                    // Asigură-te că currentCategory este setat la o valoare implicită sau la null inițial
+                    // În acest caz, nu setăm o categorie default, ci așteptăm ca MC să aleagă.
+                    // Această ramură ar trebui să se întâmple doar dacă nimeni nu a ales încă o categorie.
+                }
+            }
         }
-        else
-        {
-             // Fallback dacă nu suntem încă în cameră la Start (nu ar trebui să se întâmple în lobby)
-             // sau dacă scriptul persistă între scene.
-             // Pentru lobby, acest Start se cheamă după OnJoinedRoom.
-        }
-
+        
         // Conectează butoanele "Start Race" și "Leave Room" prin cod
         if (StartRaceButton != null) StartRaceButton.onClick.AddListener(StartGame);
         if (LeaveRoomButton != null) LeaveRoomButton.onClick.AddListener(LeaveRoom);
@@ -157,7 +182,7 @@ public class GameMenuController : MonoBehaviourPunCallbacks
             if (inputLaps < 1)
             {
                 inputLaps = 1;
-                lapsInput.text = "1"; // Actualizează vizual la 1
+                if (lapsInput != null) lapsInput.text = "1"; // Actualizează vizual la 1
             }
             Laps = inputLaps; // Actualizează variabila statică local
 
@@ -170,7 +195,7 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         else
         {
             // Dacă inputul nu e număr, setează la 1 și sincronizează
-            lapsInput.text = "1";
+            if (lapsInput != null) lapsInput.text = "1";
             Laps = 1;
             Hashtable customProperties = new Hashtable();
             customProperties[LAPS_KEY] = Laps;
@@ -192,7 +217,6 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         PhotonNetwork.CurrentRoom.SetCustomProperties(customProperties);
         Debug.Log($"Master Client set category to: {categoryName}");
     }
-
 
     // Metodă pentru a selecta vizual o categorie (apelată local sau din rețea)
     private void UpdateCategoryUI(string categoryToDisplay) // Redenumită pentru claritate
@@ -236,35 +260,39 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     {
         if (!PhotonNetwork.IsMasterClient) return; // Doar Master Client-ul poate porni jocul
 
-        if (!isCategorySelected) // Aici se verifică dacă o categorie a fost selectată
+        if (isLoadingScene) // Previne apelurile multiple dacă deja se încarcă o scenă
+        {
+            Debug.LogWarning("Scene load already in progress or initiated.");
+            return;
+        }
+
+        if (!isCategorySelected)
         {
             Debug.LogWarning("Please select a category before starting the game!");
-
             if (errorMsg != null)
             {
                 errorMsg.SetActive(true); // Afișează mesajul de eroare
                 CancelInvoke(nameof(HideErrorMsg)); // Anulează orice invocare anterioară a HideErrorMsg
                 Invoke(nameof(HideErrorMsg), 3f); // Programează ascunderea mesajului după 3 secunde
             }
-            return; // Oprește execuția funcției, jocul nu va porni
-        }
-
-        // Asigură-te că toți jucătorii sunt pregătiți sau numărul minim de jucători este atins
-        if (PhotonNetwork.CurrentRoom.PlayerCount < 2) // Exemplu: minim 2 jucători pentru a porni
-        {
-            Debug.LogWarning("Not enough players to start the game!");
-             if (errorMsg != null)
-            {
-                errorMsg.GetComponent<TMP_Text>().text = "Need at least 2 players!"; // Actualizează textul erorii
-                errorMsg.SetActive(true);
-                CancelInvoke(nameof(HideErrorMsg));
-                Invoke(nameof(HideErrorMsg), 3f);
-            }
             return;
         }
 
-        // Dacă totul este în regulă, încarcă scena de joc
-        PhotonNetwork.LoadLevel("Game"); 
+        // --- ELIMINAT: Verificarea numărului minim de jucători ---
+        // Acum poți juca și singur.
+        // if (PhotonNetwork.CurrentRoom.PlayerCount < 2) { ... return; }
+
+        // Dacă totul este în regulă, setează flag-ul și încarcă scena
+        isLoadingScene = true;
+        // Opțional: Dezactivează butonul de Start imediat după ce ai apăsat,
+        // pentru a oferi feedback vizual utilizatorului
+        if (StartRaceButton != null)
+        {
+            StartRaceButton.interactable = false;
+        }
+
+        Debug.Log("Master Client initiating scene load: Game");
+        PhotonNetwork.LoadLevel("Game");
     }
 
     // Metodă pentru a ascunde mesajul de eroare
@@ -329,6 +357,7 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         Debug.Log($"Player {newPlayer.NickName} entered room.");
         UpdatePlayerNames();
         UpdatePlayerCount();
+        
         // Când un jucător nou intră, Master Client-ul re-trimite proprietățile camerei
         // pentru a asigura sincronizarea instantanee a Laps și Category pentru noul venit.
         if (PhotonNetwork.IsMasterClient)
@@ -345,78 +374,73 @@ public class GameMenuController : MonoBehaviourPunCallbacks
         Debug.Log($"Player {otherPlayer.NickName} left room.");
         UpdatePlayerNames();
         UpdatePlayerCount();
-        // Dacă Master Client-ul părăsește camera, noul Master Client va fi anunțat.
-        // Noul Master Client va trebui să se asigure că setările sunt corecte.
-        if (PhotonNetwork.IsMasterClient)
-        {
-            // Noul Master Client devine activ
-            startButton.SetActive(true);
-            lapsInput.interactable = true;
-            if (CalculationsButton != null) CalculationsButton.interactable = true; // Re-activează butoanele de categorie
-            if (FormulasButton != null) FormulasButton.interactable = true;
-            // Și își asumă controlul vizual
-            if (CalculationsButton != null) CalculationsButton.transition = Selectable.Transition.ColorTint; // Restabilește tranzițiile
-            if (FormulasButton != null) FormulasButton.transition = Selectable.Transition.ColorTint;
-
-            // Ar trebui să re-sincronizeze laps-urile și categoria, în cazul în care au fost setate anterior.
-            // Acestea ar trebui să fie deja în proprietățile camerei, dar o re-setare nu strică.
-            if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(LAPS_KEY))
-            {
-                Hashtable customProps = new Hashtable();
-                customProps[LAPS_KEY] = Laps; // Folosește valoarea Laps locală
-                PhotonNetwork.CurrentRoom.SetCustomProperties(customProps);
-            }
-            if (!PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CATEGORIE_KEY))
-            {
-                Hashtable customProps = new Hashtable();
-                customProps[CATEGORIE_KEY] = currentCategory; // Folosește valoarea categoriei locale
-                PhotonNetwork.CurrentRoom.SetCustomProperties(customProps);
-            }
-        }
-        else // Non-Master client
-        {
-            startButton.SetActive(false);
-            lapsInput.interactable = false;
-            if (CalculationsButton != null) CalculationsButton.interactable = false;
-            if (FormulasButton != null) FormulasButton.interactable = false;
-            // Dezactivează tranzițiile vizuale
-            if (CalculationsButton != null) CalculationsButton.transition = Selectable.Transition.None;
-            if (FormulasButton != null) FormulasButton.transition = Selectable.Transition.None;
-        }
+        
+        // La plecarea unui jucător, actualizează starea UI-ului în funcție de noul Master Client
+        // Sau asigură-te că non-Master Client-ii își pierd interactivitatea
+        ApplyMasterClientUIState();
     }
 
     public override void OnMasterClientSwitched(Player newMasterClient)
     {
         Debug.Log($"Master Client switched to: {newMasterClient.NickName}");
-        // La schimbarea Master Client-ului, actualizează starea UI-ului
-        startButton.SetActive(PhotonNetwork.IsMasterClient);
-        lapsInput.interactable = PhotonNetwork.IsMasterClient;
+        // La schimbarea Master Client-ului, actualizează starea UI-ului pentru toți
+        ApplyMasterClientUIState();
 
+        // Noul Master Client trebuie să se asigure că Laps și Category sunt preluate din proprietățile camerei
+        // sau setate dacă lipsesc (de exemplu, dacă vechiul MC a părăsit înainte de a seta).
+        if (PhotonNetwork.IsMasterClient)
+        {
+            if (PhotonNetwork.CurrentRoom != null)
+            {
+                if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(LAPS_KEY))
+                {
+                    Laps = (int)PhotonNetwork.CurrentRoom.CustomProperties[LAPS_KEY];
+                    if (lapsInput != null) lapsInput.text = Laps.ToString();
+                }
+                else // Dacă nu există, noul MC setează default-ul
+                {
+                    Hashtable initialLapsProps = new Hashtable();
+                    initialLapsProps[LAPS_KEY] = Laps;
+                    PhotonNetwork.CurrentRoom.SetCustomProperties(initialLapsProps);
+                }
+
+                if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CATEGORIE_KEY))
+                {
+                    string newCategory = PhotonNetwork.CurrentRoom.CustomProperties[CATEGORIE_KEY]?.ToString();
+                    UpdateCategoryUI(newCategory);
+                }
+                // Dacă nu există categorie, noul MC va alege una sau va aștepta.
+            }
+        }
+    }
+
+    // Metodă auxiliară pentru a aplica starea UI-ului în funcție de rolul de Master Client
+    private void ApplyMasterClientUIState()
+    {
         bool isMaster = PhotonNetwork.IsMasterClient;
+
+        if (startButton != null) startButton.SetActive(isMaster);
+        if (lapsInput != null) lapsInput.interactable = isMaster;
+
         if (CalculationsButton != null) CalculationsButton.interactable = isMaster;
         if (FormulasButton != null) FormulasButton.interactable = isMaster;
 
-        if (!isMaster)
-        {
-            if (CalculationsButton != null) CalculationsButton.transition = Selectable.Transition.None;
-            if (FormulasButton != null) FormulasButton.transition = Selectable.Transition.None;
-        }
-        else
+        // Gestionează tranzițiile vizuale ale butoanelor de categorie
+        if (isMaster)
         {
             if (CalculationsButton != null) CalculationsButton.transition = Selectable.Transition.ColorTint;
             if (FormulasButton != null) FormulasButton.transition = Selectable.Transition.ColorTint;
         }
-
-        // Asigură-te că Laps și Category sunt preluate de noul Master Client
-        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(LAPS_KEY))
+        else
         {
-            Laps = (int)PhotonNetwork.CurrentRoom.CustomProperties[LAPS_KEY];
-            lapsInput.text = Laps.ToString();
+            if (CalculationsButton != null) CalculationsButton.transition = Selectable.Transition.None;
+            if (FormulasButton != null) FormulasButton.transition = Selectable.Transition.None;
         }
-        if (PhotonNetwork.CurrentRoom.CustomProperties.ContainsKey(CATEGORIE_KEY))
+
+        // Asigură-te că selecția categoriei este vizualizată corect după schimbarea MC
+        if (!string.IsNullOrEmpty(currentCategory))
         {
-            string newCategory = PhotonNetwork.CurrentRoom.CustomProperties[CATEGORIE_KEY]?.ToString();
-            UpdateCategoryUI(newCategory);
+            UpdateCategoryUI(currentCategory); // Re-aplică vizualizarea categoriei curente
         }
     }
 
@@ -448,25 +472,6 @@ public class GameMenuController : MonoBehaviourPunCallbacks
     public void LeaveRoom()
     {
         PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LoadLevel("MainMenu"); // Asigură-te că "MainMenu" este scena corectă
+        // PhotonNetwork.LoadLevel("MainMenu"); // Scena se va încărca în OnLeftRoom
     }
-
-    // Metodă pentru a dezactiva vizual butoanele (dacă este necesar)
-    // Acum, această metodă nu ar trebui să mai fie necesară în mod direct
-    // deoarece `interactable` și `transition` sunt gestionate în `Start` și `OnMasterClientSwitched`.
-    /*
-    void DisableButtonVisuals(Button button, Sprite sprite)
-    {
-        var spriteState = new SpriteState
-        {
-            highlightedSprite = sprite,
-            pressedSprite = sprite,
-            selectedSprite = sprite,
-            disabledSprite = sprite
-        };
-        button.spriteState = spriteState;
-        button.image.sprite = sprite;
-        button.interactable = false;
-    }
-    */
 }

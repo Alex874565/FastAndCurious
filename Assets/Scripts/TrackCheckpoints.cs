@@ -104,8 +104,11 @@ public class TrackCheckpoints : MonoBehaviour
 
         if (checkpointIndex == nextCheckpointSingleIndex)
         {
+            checkpointSingle.triggeredThisLap = true;
             Debug.Log("Correct checkpoint");
             checkpointSingle.Hide();
+            
+            checkpointSingleList[nextCheckpointSingleIndex].wrongCheckpoint = false;
 
             // Check if it's the final checkpoint
             if (checkpointSingle.CompareTag("Finish"))
@@ -113,11 +116,8 @@ public class TrackCheckpoints : MonoBehaviour
                 currentLapList[carIndex]++;
 
                 Debug.Log($"Player {carTransform.name} completed lap {currentLapList[carIndex]}");
+
                 
-                if (carTransform.GetComponent<PhotonView>().IsMine)
-                {
-                    lapText.text = $"Lap: {currentLapList[carIndex] + 1}/{totalLaps}";
-                }
 
                 if (currentLapList[carIndex] < totalLaps)
                 {
@@ -125,6 +125,11 @@ public class TrackCheckpoints : MonoBehaviour
                     {
                         checkpoint.ResetCheckpoint();
                     }
+                }
+
+                if (carTransform.GetComponent<PhotonView>().IsMine)
+                {
+                    lapText.text = $"Lap: {currentLapList[carIndex] + 1}/{totalLaps}";
                 }
 
                 if (currentLapList[carIndex] >= totalLaps)
@@ -148,6 +153,7 @@ public class TrackCheckpoints : MonoBehaviour
         {
             Debug.Log("Wrong checkpoint");
             checkpointSingleList[nextCheckpointSingleIndex].Show();
+            checkpointSingleList[nextCheckpointSingleIndex].wrongCheckpoint = true;
             OnPlayerWrongCheckpoint?.Invoke(this, EventArgs.Empty);
         }
     }

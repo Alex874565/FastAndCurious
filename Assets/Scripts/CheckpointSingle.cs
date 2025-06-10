@@ -32,7 +32,7 @@ public class CheckpointSingle : MonoBehaviour
 
         if (playerBehaviour && playerBehaviour.photonView.IsMine && !triggeredThisLap)
         {
-            triggeredThisLap = true;
+            
 
             trackCheckpoints.PlayerThroughCheckpoint(this, other.transform);
 
@@ -51,7 +51,7 @@ public class CheckpointSingle : MonoBehaviour
     }
 
 
-    private bool triggeredThisLap = false;
+    public bool triggeredThisLap = false;
 
     public void ResetCheckpoint()
     {

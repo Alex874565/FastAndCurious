@@ -175,7 +175,7 @@ MonoBehaviour:
     categorie: formule
   - text: Area of the rectangle
     variante:
-    - "l\u22C5w"
+    - "l \xD7 w"
     - "(b \xD7 h)/2"
     - "2 \xD7 \u03C0 \xD7 r"
     - L + l

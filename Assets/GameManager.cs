@@ -89,7 +89,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         Time.timeScale = 1f;
         PhotonNetwork.LeaveRoom();
-        PhotonNetwork.LoadLevel("GameMenu"); // asigură-te că această scenă există
+        PhotonNetwork.LoadLevel("MainMenu"); // asigură-te că această scenă există
     }
 
     // Gestionare întrebări

@@ -48,6 +48,7 @@ MonoBehaviour:
   - RPC_FinishRaceWithPlace
   - RPC_ReportFinish
   - RPC_SetCarColor
+  - RPC_ShowResultsUI
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0
